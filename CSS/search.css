@@ -56,6 +56,9 @@
   padding:0.9em 0.4em; text-align:center;
   font-size:0.82em; color:var(--parchment-faint); font-style:italic;
 }
+/* Téléphones : le panneau prend toute la largeur de la barre du haut au lieu de
+   s'ancrer sous la loupe (il sortait de l'écran à gauche). La topbar a un
+   backdrop-filter, elle sert donc de repère au position:fixed. */
 @media (max-width:600px){
-  .search-panel{ width:calc(100vw - 2em); right:-0.5em; }
+  .search-panel{ position:fixed; top:calc(100% + 8px); left:8px; right:8px; width:auto; max-width:none; }
 }

@@ -1,0 +1,554 @@
+/* =====================================================================
+   Page d'accueil — styles propres à index.html
+   (CSS/index.css reste la base partagée avec boutique, collection, profil, mj)
+   Inspirations : carrousel 3D en verre dépoli, panneaux verticaux de
+   titre « Choisis / TA FIGURE ».
+   ===================================================================== */
+
+.home{
+  --glass:rgba(28,23,22,0.42);
+  --glass-hi:rgba(255,248,235,0.10);
+  --glass-line:rgba(255,248,235,0.16);
+  --glass-line-hi:rgba(255,248,235,0.30);
+  --gold:#d8b978;
+  --ease-out:cubic-bezier(.22,.8,.26,1);
+}
+
+/* ---------- FOND ---------- */
+/* Deux couches de la même image : nette sur le héros, floutée/assombrie
+   au défilement (opacité réglée directement par JS/accueil.js) */
+.home .page-bg{ background-attachment:scroll; }
+.home .page-bg-blur{
+  filter:blur(22px) brightness(0.45) saturate(1.1);
+  background-attachment:scroll;
+  transform:scale(1.08) translateZ(0);
+  opacity:0;
+  will-change:opacity;
+  z-index:-2;
+}
+/* voile : celui d'origine (CSS/index.css) */
+.home #embers{ mix-blend-mode:normal; opacity:0.42; will-change:transform; }
+.home .orb{ mix-blend-mode:normal; }
+.home main{ animation:none; opacity:1; }
+
+/* ---------- TOPBAR EN VERRE FLOTTANT ---------- */
+.home .topbar{
+  position:fixed;
+  top:14px; left:0; right:0;
+  margin:0 auto;
+  width:min(1180px, calc(100% - 28px));
+  padding:0.6em 0.8em 0.6em 1.6em;
+  border-radius:999px;
+  background:rgba(22,18,18,0.38);
+  backdrop-filter:blur(18px) saturate(1.4);
+  -webkit-backdrop-filter:blur(18px) saturate(1.4);
+  border:1px solid var(--glass-line);
+  box-shadow:0 10px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+  transition:background .3s ease;
+}
+.home.scrolled .topbar{ background:rgba(16,13,13,0.72); }
+.home .topbar .nav-search{ border-color:var(--glass-line); background:rgba(255,255,255,0.04); }
+.home .search-panel{ border-radius:16px; }
+.home .search-panel input{ border-radius:10px; }
+
+/* ---------- RAIL LATÉRAL ---------- */
+.side-rail{
+  position:fixed; z-index:15;
+  left:22px; top:50%;
+  transform:translate(-12px, -50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding:8px;
+  border-radius:999px;
+  background:var(--glass);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--glass-line);
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  opacity:0; pointer-events:none;
+  transition:opacity .4s ease, transform .4s var(--ease-out);
+}
+.home.scrolled .side-rail{ opacity:1; pointer-events:auto; transform:translate(0, -50%); }
+.side-rail a{
+  width:38px; height:38px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--parchment-dim);
+  transition:background .2s ease, color .2s ease;
+}
+.side-rail a svg{ width:18px; height:18px; }
+.side-rail a:hover{ background:rgba(255,255,255,0.08); color:var(--parchment); }
+.side-rail a.active{ background:rgba(255,248,235,0.14); color:var(--gold); box-shadow:inset 0 0 0 1px var(--glass-line-hi); }
+.side-rail-sep{ width:18px; height:1px; background:var(--glass-line); margin:2px 0; }
+@media (max-width:1100px){ .side-rail{ display:none; } }
+
+/* ---------- STRUCTURE DES SECTIONS ---------- */
+.home section.h-section{
+  max-width:none;
+  border-bottom:none;
+  padding:7em 6vw;
+}
+.h-glass{
+  background:linear-gradient(160deg, rgba(40,33,31,0.8), rgba(16,13,13,0.86));
+  border:1px solid var(--glass-line);
+  box-shadow:0 30px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* Titre de section façon « Choose / YOUR PREYER » */
+.h-heading{ text-align:center; margin-bottom:3em; }
+.h-heading-small{
+  font-family:"EB Garamond","EB Garamond Repli", serif;
+  font-style:italic;
+  font-size:1.6em;
+  color:var(--parchment);
+  margin:0 auto -0.15em;
+  max-width:none;
+  line-height:1.2;
+}
+.h-heading-big{
+  font-family:"Cinzel","Cinzel Repli", serif;
+  font-weight:700;
+  font-size:clamp(2em, 4.4vw, 3.2em);
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  line-height:1.1;
+  text-shadow:0 4px 30px rgba(0,0,0,0.6);
+}
+
+.h-divider{
+  display:flex; align-items:center; gap:0.7em;
+  margin:1.4em auto;
+  width:min(16em, 70%);
+}
+.h-divider span{ flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--line-strong)); }
+.h-divider span:last-child{ background:linear-gradient(90deg, var(--line-strong), transparent); }
+.h-divider i{
+  width:7px; height:7px; transform:rotate(45deg);
+  background:var(--blood); box-shadow:0 0 10px var(--blood);
+  flex-shrink:0;
+}
+
+/* ---------- HÉROS ---------- */
+/* Mise en page d'origine (classes .hero-* de CSS/index.css) : texte à gauche.
+   Ajustements pour la topbar flottante et l'entrée animée. */
+.home .hero-photo{
+  min-height:100vh;
+  min-height:100svh;
+  padding-top:80px; /* place de la topbar flottante */
+}
+.home .hero-photo-content{ padding-top:0; padding-bottom:4vw; animation:heroIn 1.1s var(--ease-out) both; }
+@keyframes heroIn{
+  from{ opacity:0; transform:translateY(24px); }
+  to{ opacity:1; transform:none; }
+}
+
+/* ---------- CARROUSEL 3D DU CODEX ---------- */
+/* Grande carte centrale + cartes latérales serrées, inclinées en profondeur.
+   .cf-card = coque positionnée en 3D (transform piloté par JS/accueil.js)
+   .cf-inner = visuel de la carte (inclinaison souris + oscillation au changement) */
+.home section.h-codex{ padding-left:0; padding-right:0; overflow:hidden; }
+.h-codex .h-heading{ margin-bottom:1.2em; }
+.cf{
+  --card-w:clamp(250px, 19vw, 350px);
+  --card-h:min(calc(var(--card-w) * 1.48), 66vh);
+  --ac:#c9a66b; /* couleur de la carte active (mise à jour par JS) */
+  position:relative;
+}
+.cf-stage{
+  position:relative;
+  height:calc(var(--card-h) + 60px);
+  perspective:1500px;
+  perspective-origin:50% 40%;
+  outline:none;
+  touch-action:pan-y;
+  user-select:none;
+}
+.cf-stage:focus-visible{ box-shadow:inset 0 0 0 1px var(--glass-line-hi); }
+
+.cf-card{
+  --x:0; --z:0; --ry:0deg;
+  position:absolute;
+  left:50%; top:30px;
+  width:var(--card-w); height:var(--card-h);
+  margin-left:calc(var(--card-w) / -2);
+  color:var(--parchment);
+  transform:
+    translateX(calc(var(--x) * var(--card-w)))
+    translateZ(var(--z))
+    rotateY(var(--ry));
+  perspective:900px;
+  transition:transform .5s cubic-bezier(.25,.8,.3,1), opacity .35s ease;
+  will-change:transform;
+  cursor:pointer;
+  -webkit-user-drag:none;
+}
+.cf-card.is-hidden{ opacity:0; pointer-events:none; }
+/* assombrit les cartes du fond (opacité = animée par la carte graphique) */
+.cf-dim{
+  position:absolute; inset:0; z-index:7; pointer-events:none;
+  background:#0a0808;
+  opacity:calc((1 - var(--lum, 1)) * 1.3);
+  transition:opacity .5s ease;
+}
+
+.cf-inner{
+  --tx:0deg; --ty:0deg; --mx:50%; --my:30%;
+  position:absolute; inset:0;
+  border-radius:24px;
+  overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 50% 25%, color-mix(in srgb, var(--c) 30%, transparent), transparent 70%),
+    linear-gradient(180deg, #201a19, #0d0b0b);
+  border:1px solid var(--glass-line);
+  box-shadow:0 30px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+  transform:rotateX(var(--tx)) rotateY(var(--ty));
+  transition:transform .5s var(--ease-out), border-color .4s ease, box-shadow .6s ease;
+}
+.cf-card.is-active .cf-inner{
+  border-color:color-mix(in srgb, var(--c) 45%, rgba(255,248,235,0.3));
+  box-shadow:0 40px 90px rgba(0,0,0,0.65), 0 0 70px color-mix(in srgb, var(--c) 28%, transparent), inset 0 1px 0 rgba(255,255,255,0.14);
+}
+.cf-card.is-tilting .cf-inner{ transition:transform .12s linear, border-color .4s ease, box-shadow .6s ease; }
+/* cadre intérieur */
+.cf-inner::before{
+  content:""; position:absolute; inset:9px; z-index:3; pointer-events:none;
+  border-radius:17px;
+  border:1px solid rgba(255,248,235,0.09);
+}
+.cf-card.is-active .cf-inner::before{ border-color:color-mix(in srgb, var(--c) 30%, rgba(255,248,235,0.1)); }
+/* reflet qui suit la souris */
+.cf-inner::after{
+  content:""; position:absolute; inset:0; z-index:4; pointer-events:none;
+  background:
+    radial-gradient(circle at var(--mx) var(--my), rgba(255,250,235,0.16), transparent 45%),
+    linear-gradient(125deg, rgba(255,255,255,0.09) 0%, transparent 30%);
+  opacity:.8;
+}
+
+/* Oscillation de la carte qui arrive au centre */
+.cf-card.swing-next .cf-inner{ animation:cfSwingNext .6s cubic-bezier(.3,.7,.3,1); }
+.cf-card.swing-prev .cf-inner{ animation:cfSwingPrev .6s cubic-bezier(.3,.7,.3,1); }
+@keyframes cfSwingNext{
+  0%  { transform:rotateY(-16deg) rotateZ(1.5deg) scale(.95); }
+  45% { transform:rotateY(7deg) rotateZ(-1deg) translateY(-14px) scale(1.04); }
+  72% { transform:rotateY(-2.5deg) translateY(-4px) scale(1.01); }
+  100%{ transform:rotateX(var(--tx)) rotateY(var(--ty)); }
+}
+@keyframes cfSwingPrev{
+  0%  { transform:rotateY(16deg) rotateZ(-1.5deg) scale(.95); }
+  45% { transform:rotateY(-7deg) rotateZ(1deg) translateY(-14px) scale(1.04); }
+  72% { transform:rotateY(2.5deg) translateY(-4px) scale(1.01); }
+  100%{ transform:rotateX(var(--tx)) rotateY(var(--ty)); }
+}
+/* éclat de lumière qui traverse la carte à son arrivée */
+.cf-sheen{
+  position:absolute; inset:-20% -60%; z-index:5; pointer-events:none;
+  background:linear-gradient(105deg, transparent 40%, rgba(255,245,220,0.28) 50%, transparent 60%);
+  transform:translateX(-70%);
+  opacity:0;
+}
+.cf-card.swing-next .cf-sheen,
+.cf-card.swing-prev .cf-sheen{ animation:cfSheen .7s ease-out .05s; }
+@keyframes cfSheen{
+  0%  { transform:translateX(-70%); opacity:1; }
+  100%{ transform:translateX(70%); opacity:1; }
+}
+
+.cf-art{ position:absolute; inset:0; overflow:hidden; }
+.cf-art::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg, rgba(13,11,11,0.15) 0%, transparent 25%, transparent 50%, #0d0b0b 92%);
+}
+/* paysage de montagnes + icône (dessinés, aucune image à charger) */
+.cf-peaks{ position:absolute; inset:0; width:100%; height:100%; }
+.cf-peaks-front{ fill:#0d0b0b; opacity:.9; }
+.cf-icon{
+  position:absolute; left:50%; top:34%;
+  width:84px; height:84px;
+  transform:translate(-50%, -50%);
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%;
+  color:color-mix(in srgb, var(--c) 70%, #fff);
+  border:1.5px solid color-mix(in srgb, var(--c) 75%, #fff);
+  background:radial-gradient(circle, color-mix(in srgb, var(--c) 22%, transparent), transparent 70%);
+  box-shadow:0 0 24px color-mix(in srgb, var(--c) 45%, transparent), inset 0 0 18px color-mix(in srgb, var(--c) 25%, transparent);
+  transition:transform .5s var(--ease-out);
+}
+.cf-icon svg{ width:42px; height:42px; filter:drop-shadow(0 0 6px color-mix(in srgb, var(--c) 60%, transparent)); }
+.cf-card:not(.is-active) .cf-icon{ border-color:transparent; background:none; box-shadow:none; }
+.cf-card:not(.is-active) .cf-icon svg{ filter:none; opacity:.75; }
+.cf-card.is-active:hover .cf-icon{ transform:translate(-50%, -50%) scale(1.08); }
+.cf-card.is-soon .cf-art{ filter:saturate(0.45); }
+
+.cf-chip{
+  position:absolute; top:22px; left:50%; z-index:6;
+  transform:translate(-50%, -6px);
+  font-family:"Cinzel","Cinzel Repli", serif;
+  font-size:0.68em; letter-spacing:0.1em;
+  padding:0.5em 1.2em;
+  border-radius:999px;
+  background:rgba(14,12,12,0.72);
+  border:1px solid var(--glass-line-hi);
+  opacity:0;
+  transition:opacity .4s ease, transform .4s ease, background .2s ease;
+}
+.cf-card.is-active .cf-chip{ opacity:1; transform:translate(-50%, 0); }
+.cf-card.is-active:hover .cf-chip{ background:rgba(40,32,28,0.7); }
+
+/* Encart d'informations */
+.cf-body{
+  position:absolute; left:0; right:0; bottom:0; z-index:6;
+  padding:1em 1.1em 1.2em;
+}
+.cf-card.is-active .cf-body{
+  left:16px; right:16px; bottom:16px;
+  padding:1em 1.2em 1.1em;
+  border-radius:16px;
+  background:rgba(14,12,12,0.84);
+  border:1px solid var(--glass-line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.cf-head{ display:flex; align-items:baseline; justify-content:space-between; gap:0.6em; }
+.cf-head h3{
+  font-family:"Cinzel","Cinzel Repli", serif;
+  font-weight:700;
+  font-size:1.5em;
+  line-height:1.1;
+  text-shadow:0 2px 14px rgba(0,0,0,0.8);
+}
+.cf-head h3::first-letter{
+  font-size:1.3em;
+  color:color-mix(in srgb, var(--c) 75%, #fff);
+}
+.cf-count{
+  font-family:"Cinzel","Cinzel Repli", serif;
+  font-size:0.75em; letter-spacing:0.06em;
+  color:var(--parchment-dim);
+  white-space:nowrap; flex-shrink:0;
+}
+.cf-desc, .cf-meta{
+  display:none;
+  font-size:0.86em; line-height:1.5;
+  color:var(--parchment);
+  margin:0;
+}
+.cf-card.is-active .cf-desc{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:3;
+  overflow:hidden;
+  margin-top:0.7em; padding-top:0.7em;
+  border-top:1px solid var(--glass-line);
+  animation:cfIn .4s var(--ease-out) .1s both;
+}
+.cf-card.is-active .cf-meta{
+  display:block;
+  margin-top:0.55em;
+  font-family:"Cinzel","Cinzel Repli", serif; font-size:0.62em; letter-spacing:0.1em;
+  color:var(--gold);
+  animation:cfIn .4s var(--ease-out) .15s both;
+}
+.cf-meta.cf-soon{ color:var(--parchment-faint) !important; }
+@keyframes cfIn{
+  from{ opacity:0; transform:translateY(8px); }
+  to{ opacity:1; transform:none; }
+}
+/* cartes latérales : nom + sous-titre discrets */
+.cf-card:not(.is-active) .cf-head h3{ font-size:1em; font-weight:600; }
+.cf-card:not(.is-active) .cf-count{ display:none; }
+.cf-sub{
+  margin:0.15em 0 0;
+  font-size:0.74em; font-style:italic;
+  color:var(--parchment-dim);
+}
+.cf-card.is-active .cf-sub{ display:none; }
+.cf-card.is-right .cf-body{ text-align:right; }
+.cf-card.is-right .cf-head{ justify-content:flex-end; }
+
+/* Pilule du bas : miniature + titre à gauche, flèches à droite */
+.cf-dock{
+  position:relative; z-index:5;
+  display:flex; align-items:center; justify-content:space-between; gap:1.4em;
+  width:min(440px, calc(100% - 32px));
+  margin:0.6em auto 0;
+  padding:8px 8px 8px 8px;
+  border-radius:999px;
+  background:var(--glass);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--glass-line);
+  box-shadow:0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.cf-dock-main{ display:flex; align-items:center; gap:0.9em; min-width:0; }
+.cf-dock-thumb{
+  width:50px; height:50px; flex-shrink:0;
+  border-radius:50%; overflow:hidden;
+  border:1px solid color-mix(in srgb, var(--ac) 60%, transparent);
+  box-shadow:0 0 16px color-mix(in srgb, var(--ac) 35%, transparent);
+  background:rgba(0,0,0,0.3);
+  transition:border-color .6s ease, box-shadow .6s ease;
+}
+.cf-dock-thumb{ display:flex; align-items:center; justify-content:center; color:color-mix(in srgb, var(--ac) 70%, #fff); }
+.cf-dock-thumb svg{ width:24px; height:24px; }
+.cf-dock-text{ display:flex; flex-direction:column; line-height:1.25; min-width:0; }
+.cf-dock-name{ font-family:"Cinzel","Cinzel Repli", serif; font-weight:600; font-size:1em; white-space:nowrap; }
+.cf-dock-sub{ font-size:0.82em; color:var(--parchment-dim); white-space:nowrap; }
+.cf-arrows{ display:flex; gap:8px; flex-shrink:0; }
+.cf-arrow{
+  width:42px; height:42px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--glass-line);
+  color:var(--parchment);
+  cursor:pointer;
+  transition:background .2s ease, border-color .2s ease, transform .2s ease;
+}
+.cf-arrow svg{ width:17px; height:17px; }
+.cf-arrow:hover{ background:rgba(255,255,255,0.14); border-color:var(--glass-line-hi); }
+.cf-arrow:active{ transform:scale(.92); }
+
+.cf-dots{ display:flex; justify-content:center; gap:7px; margin-top:1.1em; }
+.cf-dots button{
+  width:7px; height:7px; padding:0;
+  border:none; border-radius:999px;
+  background:rgba(255,248,235,0.28);
+  cursor:pointer;
+  transition:width .35s var(--ease-out), background .3s ease;
+}
+.cf-dots button[aria-selected="true"]{ width:22px; background:var(--ac); }
+
+/* ---------- À PROPOS ---------- */
+.h-about-card{
+  max-width:780px; margin:0 auto;
+  padding:3.4em 3em;
+  border-radius:28px;
+  text-align:center;
+}
+.h-about-card h2{ font-size:clamp(1.5em, 3vw, 2.1em); line-height:1.25; }
+.h-about-card p{ margin:0 auto 1em; color:var(--parchment-dim); font-size:1.06em; }
+.h-about-card .h-heading-small{ font-size:1.3em; color:var(--parchment); margin-bottom:0.4em; }
+.h-about-final{ margin-top:1.6em !important; font-style:italic; color:var(--parchment) !important; font-size:1.18em !important; }
+
+/* ---------- DÉ ---------- */
+.home section.dice-panel{ text-align:center; padding-top:5em; padding-bottom:6em; }
+.home .dice-panel .h-heading{ margin-bottom:0.6em; }
+.h-dice-lede{ margin:0 auto 1em; font-style:italic; color:var(--parchment-dim); }
+
+/* ---------- PIED DE PAGE ---------- */
+.h-footer{
+  position:relative;
+  max-width:860px;
+  margin:0 auto 3em;
+  border-radius:28px;
+  background:rgba(16,13,13,0.8);
+  border:1px solid var(--glass-line);
+}
+.home .h-footer section.credits{ padding:0 0 2em; max-width:56ch; }
+
+/* ---------- MOBILE ---------- */
+@media (max-width:980px){
+  .home .topbar{ padding:0.55em 0.7em 0.55em 1.2em; }
+}
+@media (max-width:600px){
+  .home .topbar{ top:8px; width:calc(100% - 16px); }
+  .home section.h-section{ padding:4.5em 16px; }
+  .h-heading{ margin-bottom:2em; }
+  .h-heading-small{ font-size:1.3em; }
+  .cf{ --card-w:min(64vw, 260px); }
+  .cf-card.is-active .cf-head h3{ font-size:1.2em; }
+  .cf-dock{ gap:0.6em; }
+  .h-about-card{ padding:2.4em 1.4em; border-radius:20px; }
+  .h-footer{ margin:0 16px 2em; border-radius:20px; padding:2.4em 1.2em; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .cf-card, .cf-inner, .cf-sheen, .cf-icon, .hero-photo-content{ transition:none !important; animation:none !important; }
+}
+
+/* =====================================================================
+   APPARITIONS AU DÉFILEMENT
+   Les blocs marqués [data-reveal] reçoivent .is-in en entrant à l'écran
+   (JS/accueil.js). États cachés seulement si JS actif (.js sur <html>)
+   et si l'utilisateur n'a pas demandé à réduire les animations.
+   ===================================================================== */
+
+/* filet doré sous les titres de section */
+.h-heading::after{
+  content:"";
+  display:block;
+  width:140px; height:1px;
+  margin:1.1em auto 0;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  box-shadow:0 0 12px rgba(216,185,120,0.6);
+}
+
+@media (prefers-reduced-motion:no-preference){
+
+  /* --- Titres : le petit mot descend, le grand se resserre et devient net --- */
+  .js .h-heading-small{ transition:opacity .9s ease, transform .9s var(--ease-out); }
+  .js .h-heading-big{ transition:opacity 1.1s ease .15s, transform 1.4s var(--ease-out) .15s; }
+  .js .h-heading::after{ transition:transform 1.3s var(--ease-out) .55s, opacity 1s ease .55s; }
+  .js [data-reveal]:not(.is-in) .h-heading-small{ opacity:0; transform:translateY(-14px); }
+  .js [data-reveal]:not(.is-in) .h-heading-big{ opacity:0; transform:scale(1.18); }
+  .js [data-reveal]:not(.is-in) .h-heading::after,
+  .js .h-heading[data-reveal]:not(.is-in)::after{ opacity:0; transform:scaleX(0); }
+
+  /* --- Carrousel : les bandes montent une à une, du centre vers les bords --- */
+  .js .cf-card{
+    transition:transform .5s cubic-bezier(.25,.8,.3,1), opacity .35s ease, translate 1.1s var(--ease-out);
+  }
+  .js .cf[data-reveal]:not(.is-in) .cf-card{ opacity:0; translate:0 110px; }
+  .js .cf.revealing .cf-card{
+    transition-duration:.5s, 1s, 1.1s;
+    transition-delay:calc(var(--abs) * 130ms + 150ms);
+  }
+  .js .cf-dock, .js .cf-dots{ transition:opacity .9s ease .75s, translate .9s var(--ease-out) .75s; }
+  .js .cf[data-reveal]:not(.is-in) .cf-dock,
+  .js .cf[data-reveal]:not(.is-in) .cf-dots{ opacity:0; translate:0 24px; }
+
+  /* --- Bloc « À propos » : le verre se pose, puis le texte s'écrit ligne à ligne --- */
+  .js .h-about-card{
+    transition:opacity 1s ease, transform 1.2s var(--ease-out);
+  }
+  .js .h-about-card[data-reveal]:not(.is-in){ opacity:0; transform:translateY(50px) scale(0.95); }
+  .js .h-about-card > *{ transition:opacity .8s ease, transform .9s var(--ease-out); }
+  .js .h-about-card[data-reveal]:not(.is-in) > *{ opacity:0; transform:translateY(16px); }
+  .js .h-about-card > :nth-child(1){ transition-delay:.35s; }
+  .js .h-about-card > :nth-child(2){ transition-delay:.5s; }
+  .js .h-about-card > :nth-child(3){ transition-delay:.65s; }
+  .js .h-about-card > :nth-child(4){ transition-delay:.8s; }
+  .js .h-about-card > :nth-child(5){ transition-delay:.95s; }
+  .js .h-about-card > :nth-child(6){ transition-delay:1.2s; }
+  /* reflet de lumière qui balaie le verre */
+  .h-about-card{ position:relative; overflow:hidden; }
+  .h-about-card::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(105deg, transparent 35%, rgba(255,236,200,0.14) 50%, transparent 65%);
+    transform:translateX(-110%);
+  }
+  .js .h-about-card.is-in::before{ animation:glassSweep 1.8s ease-out .7s; }
+  @keyframes glassSweep{
+    from{ transform:translateX(-110%); }
+    to{ transform:translateX(110%); }
+  }
+
+  /* --- Dé : il tombe en tournoyant et rebondit --- */
+  .js .dice-panel[data-reveal]:not(.is-in) .d20-die,
+  .js .dice-panel[data-reveal]:not(.is-in) .h-dice-lede,
+  .js .dice-panel[data-reveal]:not(.is-in) .d20-result{ opacity:0; }
+  .js .dice-panel.is-in .d20-die{ animation:dieDrop 1.2s cubic-bezier(.34,1.45,.64,1) .45s backwards; }
+  .js .dice-panel.is-in .h-dice-lede{ animation:fadeUp .9s var(--ease-out) .3s backwards; }
+  .js .dice-panel.is-in .d20-result{ animation:fadeUp .9s var(--ease-out) 1.3s backwards; }
+  @keyframes dieDrop{
+    from{ opacity:0; transform:translateY(-120px) rotate(-260deg) scale(0.5); }
+    60%{ opacity:1; }
+    to{ opacity:1; transform:none; }
+  }
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(18px); }
+    to{ opacity:1; transform:none; }
+  }
+
+  /* --- Pied de page --- */
+  .js .h-footer{ transition:opacity 1s ease, transform 1.1s var(--ease-out); }
+  .js .h-footer[data-reveal]:not(.is-in){ opacity:0; transform:translateY(40px); }
+}

@@ -310,7 +310,7 @@ function ouvrirFormObjet(item = null) {
       <label class="large">Description <textarea name="description" class="champ" rows="2">${esc(item?.description)}</textarea></label>
       <label>Stock min (marchand) <input name="stock_min" class="champ" type="number" min="0" value="${item?.min_stock ?? 1}"></label>
       <label>Stock max (marchand) <input name="stock_max" class="champ" type="number" min="0" value="${item?.max_stock ?? 5}"></label>
-      <label>Image (bannière) <input name="image" class="champ" placeholder="images/bannieres/xxx.jpg" value="${esc(p.image)}"></label>
+      <label>Image (bannière) <input name="image" class="champ" placeholder="img/Bannière/xxx.webp" value="${esc(p.image)}"></label>
       <label>Texte (titre) <input name="texte" class="champ" value="${esc(p.text)}"></label>
       <label>Couleur (thème) <input name="couleur" class="champ" placeholder="#8b1e2d" value="${esc(p.accent)}"></label>
       <label>Couleur 2 (thème, optionnelle) <input name="couleur2" class="champ" placeholder="#d4b537" value="${esc(p.accent2)}"></label>

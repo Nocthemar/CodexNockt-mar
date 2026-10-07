@@ -16,6 +16,10 @@
   --rayon: 0;              /* le site n'utilise que des arêtes vives (pas de coins arrondis, hors icônes rondes) */
 }
 
+/* L'attribut hidden (utilisé par les scripts pour masquer un bloc) doit toujours
+   l'emporter, même sur un élément stylé en display:flex ou grid */
+[hidden] { display: none !important; }
+
 /* ---------- Lien Boutique (nav) ---------- */
 /* Reprend la typo de .nav-links a (CSS/index.css) pour s'intégrer à la
    topbar sur toutes les pages, y compris celles qui n'ont pas de nav-links
@@ -117,6 +121,19 @@
   cursor: pointer;
 }
 .btn-deco:hover { color: var(--perte); border-color: var(--perte); }
+
+/* Téléphones : la barre du haut n'a pas la place pour tout afficher en entier.
+   Bouton Discord réduit au logo, pseudo masqué (l'avatar reste), "← Catégories" réduit à la flèche. */
+@media (max-width: 600px) {
+  #discord-auth { min-width: 0; gap: 6px; }
+  .btn-discord { padding: 8px 10px; }
+  .btn-discord__texte { display: none; }
+  .auth-user__nom { display: none; }
+  .auth-user__avatar, .btn-deco, .lien-mj { width: 28px; height: 28px; }
+  .nav-boutique { font-size: .68em; letter-spacing: .06em; }
+  .topbar .back { font-size: 0; padding: 6px 10px; }
+  .topbar .back::before { content: "←"; font-size: 1rem; }
+}
 
 
 /* ---------- Page profil ---------- */
@@ -364,7 +381,6 @@
   margin-top: 18px;
 }
 .perso__bas:not(:has(> :not([hidden]))) { display: none; }
-.perso__inventaire[hidden] { display: none; }
 /* Hauteur de son contenu seulement : ne s'étire pas pour suivre la bourse à côté */
 .perso__inventaire { display: flex; flex-direction: column; align-self: start; }
 /* Annule le ".stat:has(.stat__liste)" pleine largeur, sinon la bourse passe en dessous */
@@ -435,7 +451,6 @@
 }
 /* Bourse seule (pas d'inventaire) : toute la largeur, avec une hauteur à elle */
 .perso__inventaire[hidden] + .perso__bourse { grid-column: 1 / -1; min-height: 200px; }
-.perso__bourse[hidden] { display: none; }
 .perso__bourse-label {
   font-size: .75rem;
   text-transform: uppercase;

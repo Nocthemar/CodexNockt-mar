@@ -108,7 +108,7 @@ body::after{
   opacity:0.12;
 }
 @media (max-width:700px){
-  .orb-white, .orb-red, .orb-red-soft{ filter:blur(60px); }
+  .orb-white, .orb-red{ filter:blur(60px); }
 }
 
 /* ---------- TOPBAR ---------- */
@@ -297,13 +297,6 @@ tr:hover td{background:rgba(222,210,171,0.02);}
   max-width:16ch;
 }
 .hero h1 em{ font-style:normal; color:var(--bronze); }
-.hero .crest{ position:absolute; pointer-events:none; filter:blur(1px); }
-.hero .crossed-swords{
-  width:56px; height:56px;
-  margin:0 auto;
-  display:block;
-  opacity:0.85;
-}
 .hero-sub{
   margin-top:1.6em;
   max-width:52ch;
@@ -351,12 +344,6 @@ tr:hover td{background:rgba(222,210,171,0.02);}
 }
 @media (max-width:700px){
   .page-bg{ background-attachment:scroll; }
-}
-
-/* semi-opaque panel so text/tiles stay legible over the photo lower on the page */
-.content-panel{
-  position:relative;
-  background:rgba(19,16,16,0.94);
 }
 
 /* ---------- HERO PHOTO (hub) ---------- */
@@ -416,103 +403,6 @@ tr:hover td{background:rgba(222,210,171,0.02);}
   .hero-photo{ min-height:80vh; }
   .hero-photo-content{ padding:3.5em 6vw 3em; max-width:none; }
 }
-
-/* ---------- CATEGORY HUB GRID ---------- */
-/* Each tile's artwork (img/titles/*.webp) is pre-cropped to just the
-   gold-framed illustration.
-   The image fills the whole tile (no separate opaque label box, which
-   read as a flat grey rectangle) — icon/name/status sit directly on top,
-   kept legible with drop-shadow/text-shadow instead of a background block. */
-.hub-grid{
-  display:grid;
-  grid-template-columns:repeat(3, 1fr);
-  align-items:start;
-  gap:1.5cm;
-}
-.cat-tile{
-  display:block;
-  /* Un peu plus petite que sa colonne, centrée : image et texte (en cqw) rétrécissent ensemble */
-  width:calc(88% - 2mm);
-  margin-inline:auto;
-  aspect-ratio:var(--tile-ratio, 2.9/1);
-  background-color:transparent;
-  cursor:pointer;
-  text-align:center;
-  color:var(--parchment);
-  position:relative;
-  overflow:hidden;
-  transition:transform .3s ease, box-shadow .3s ease;
-  font-family:"EB Garamond","EB Garamond Repli", serif;
-  container-type:inline-size;
-}
-.cat-tile:hover{
-  transform:translateY(-4px);
-  box-shadow:0 14px 34px rgba(0,0,0,0.5);
-}
-.cat-tile.ready:hover{
-  box-shadow:0 14px 34px rgba(0,0,0,0.5);
-}
-.cat-tile .tile-img{
-  position:absolute; inset:0; z-index:0;
-  width:100%; height:100%;
-  object-fit:contain; object-position:center;
-  transition:filter .3s ease;
-  pointer-events:none;
-}
-.cat-tile .tile-label{
-  position:absolute; z-index:2; left:var(--label-x, 8.3%); top:var(--label-y, 49%);
-  transform:translateY(-50%);
-  display:flex; flex-direction:column; align-items:center;
-  text-align:center;
-  max-width:55%;
-}
-.cat-tile .tile-label::before{
-  content:"";
-  position:absolute;
-  inset:-0.5em -1em;
-  z-index:-1;
-  background:radial-gradient(ellipse at center, rgba(5,4,4,0.5) 0%, rgba(5,4,4,0.28) 55%, transparent 80%);
-  pointer-events:none;
-}
-.cat-tile .name{
-  display:block;
-  font-family:"Cinzel","Cinzel Repli", serif;
-  font-weight:700;
-  font-size:clamp(0.85rem, 5.3cqw, 1.8rem);
-  letter-spacing:0.03em;
-  line-height:1.15;
-  margin-bottom:0.2em;
-  text-shadow:
-    0 3px 6px rgba(0,0,0,1),
-    0 0 22px rgba(0,0,0,0.9),
-    0 0 14px rgba(255,221,160,0.75),
-    0 0 3px rgba(255,255,255,0.9);
-}
-.cat-tile .status{
-  line-height:1.2;
-  font-family:"Cinzel", "Cinzel Repli", serif; font-size:clamp(0.55rem, 2.7cqw, 0.95rem); letter-spacing:0.08em;
-  transition:letter-spacing .2s ease;
-  text-shadow:
-    0 2px 4px rgba(0,0,0,1),
-    0 0 14px rgba(0,0,0,0.85),
-    0 0 8px rgba(255,221,160,0.65);
-}
-.cat-tile.ready:hover .status{ letter-spacing:0.16em; }
-.cat-tile.ready .status{ color:var(--parchment); }
-.cat-tile.empty .status{ color:var(--parchment); }
-@media (max-width:900px){
-  .hub-grid{grid-template-columns:repeat(2, 1fr);}
-}
-@media (max-width:560px){
-  .hub-grid{grid-template-columns:1fr;}
-}
-
-.closing{ padding:7em 6vw 9em; max-width:none; }
-.closing-inner{max-width:64ch; margin:0 auto; text-align:center;}
-.closing .kicker{justify-content:center; display:flex;}
-.closing h2{font-size:2.1em; margin-bottom:1em;}
-.closing p{margin:0 auto 1.1em; font-size:1.08em; color:var(--parchment-dim);}
-.closing .final{ margin-top:2em; font-style:italic; color:var(--parchment); font-size:1.2em; }
 
 footer{
   text-align:center; padding:3em; color:var(--parchment-faint); font-size:0.8em;
@@ -603,8 +493,6 @@ footer{
 
 @media (max-width: 980px){
   section{padding:4em 6vw;}
-  .voie-grid{grid-template-columns:1fr;}
-  .voie-cell{border-right:none; border-bottom:1px solid var(--line); min-height:auto;}
   .veines-grid{grid-template-columns:1fr;}
   .two-col{grid-template-columns:1fr;}
   .hero{min-height:auto; padding-top:3em; padding-bottom:3em;}
@@ -632,13 +520,9 @@ footer{
   .character-card dl{grid-template-columns:1fr; gap:0.1em 0;}
   .character-card dt{margin-top:0.7em;}
   .character-card dt:first-child{margin-top:0;}
-  .cat-tile{padding:1em 1.2em;}
-  .veine-card, .voie-cell{min-height:auto; padding:1.5em 1.3em;}
+  .veine-card{min-height:auto; padding:1.5em 1.3em;}
   .weapon-list span{font-size:0.72em; padding:0.45em 0.85em;}
   .placeholder-hero{min-height:40vh;}
-  .closing{padding:4.5em 5.5vw 5.5em;}
-  .closing h2{font-size:1.5em;}
-  .closing .final{font-size:1.05em;}
 }
 
 @media (max-width: 380px){

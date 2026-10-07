@@ -94,7 +94,7 @@ body::after{
   opacity:0.12;
 }
 @media (max-width:700px){
-  .orb-white, .orb-red, .orb-red-soft{ filter:blur(60px); }
+  .orb-white, .orb-red{ filter:blur(60px); }
 }
 
 /* ---------- TOPBAR ---------- */

@@ -108,7 +108,7 @@ body::after{
   opacity:0.12;
 }
 @media (max-width:700px){
-  .orb-white, .orb-red, .orb-red-soft{ filter:blur(60px); }
+  .orb-white, .orb-red{ filter:blur(60px); }
 }
 
 /* ---------- TOPBAR ---------- */
@@ -376,8 +376,6 @@ footer{
 
 @media (max-width: 980px){
   section{padding:4em 6vw;}
-  .voie-grid{grid-template-columns:1fr;}
-  .voie-cell{border-right:none; border-bottom:1px solid var(--line); min-height:auto;}
   .veines-grid{grid-template-columns:1fr;}
   .two-col{grid-template-columns:1fr;}
   .hero{min-height:auto; padding-top:3em; padding-bottom:3em;}
@@ -405,13 +403,9 @@ footer{
   .character-card dl{grid-template-columns:1fr; gap:0.1em 0;}
   .character-card dt{margin-top:0.7em;}
   .character-card dt:first-child{margin-top:0;}
-  .cat-tile{padding:1em 1.2em;}
-  .veine-card, .voie-cell{min-height:auto; padding:1.5em 1.3em;}
+  .veine-card{min-height:auto; padding:1.5em 1.3em;}
   .weapon-list span{font-size:0.72em; padding:0.45em 0.85em;}
   .placeholder-hero{min-height:40vh;}
-  .closing{padding:4.5em 5.5vw 5.5em;}
-  .closing h2{font-size:1.5em;}
-  .closing .final{font-size:1.05em;}
 }
 
 @media (max-width: 380px){

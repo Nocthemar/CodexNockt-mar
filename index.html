@@ -12,10 +12,13 @@
 <link rel="stylesheet" href="CSS/index.css">
 <link rel="stylesheet" href="CSS/search.css">
 <link rel="stylesheet" href="CSS/compte.css">
+<link rel="stylesheet" href="CSS/accueil.css">
+<script>document.documentElement.classList.add('js');</script>
 </head>
-<body>
+<body class="home">
 <canvas id="embers"></canvas>
 <div class="page-bg" style="background-image:url('img/hero-nocthemar.webp');"></div>
+<div class="page-bg page-bg-blur" style="background-image:url('img/hero-nocthemar.webp');"></div>
 <div class="page-scrim"></div>
 <div class="orb orb-white"></div>
 <div class="orb orb-white-2"></div>
@@ -42,8 +45,23 @@
   <div id="discord-auth"></div>
 </header>
 
+<!-- Rail latéral (navigation rapide entre les sections) -->
+<nav class="side-rail" aria-label="Sections de la page">
+  <a href="#categories" data-section="categories" aria-label="Le Codex" title="Le Codex">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>
+  </a>
+  <a href="#d20" data-section="d20" aria-label="Dé du Destin" title="Dé du Destin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><polygon points="12,2 21,7 21,17 12,22 3,17 3,7"/><polygon points="12,7 16,14 8,14"/></svg>
+  </a>
+  <span class="side-rail-sep"></span>
+  <a href="boutique.html" aria-label="Boutique" title="Boutique">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+  </a>
+</nav>
+
 <main>
 
+  <!-- ========== HERO ========== -->
   <div class="hero-photo">
     <div class="hero-photo-content">
       <div class="hero-eyebrow">✦ Un univers à découvrir</div>
@@ -55,77 +73,166 @@
     </div>
   </div>
 
-  <div id="categories" class="content-panel" style="padding:5em 6vw 7em;">
-    <div class="kicker"><span class="num">✦</span>Catégories</div>
-    <h2 class="title" style="margin-bottom:1.2em;">Explorer le Codex </h2>
-   <div>
-    <div class="hub-grid">
-      <a class="cat-tile ready" href="categories/Pouvoirs.html" style="--tile-color:#d9b354;">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Pouvoirs.webp" alt="">
-        <div class="tile-label"><span class="name">Pouvoirs</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile ready" href="categories/Combat.html" style="--tile-color:#a8b4bd;">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Combat.webp" alt="">
-        <div class="tile-label"><span class="name">Combat</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile ready" href="categories/Bestiaire.html" style="--tile-color:#8b98a3;">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Bestiaire.webp" alt="">
-        <div class="tile-label"><span class="name">Bestiaire</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile ready" href="categories/Personnages.html" style="--tile-color:#9b7cc4;">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Personnages.webp" alt="">
-        <div class="tile-label"><span class="name">Personnages</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile ready" href="categories/Equipement.html">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Equipement.webp" alt="">
-        <div class="tile-label"><span class="name">Équipement</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile empty" href="categories/Factions.html">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Factions.webp" alt="">
-        <div class="tile-label"><span class="name">Factions</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile ready" href="categories/Lore.html">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Lore.webp" alt="">
-        <div class="tile-label"><span class="name">Lore</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile empty" href="categories/Cartes.html">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Cartes.webp" alt="">
-        <div class="tile-label"><span class="name">Cartes</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile empty" href="categories/Commerce.html">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Commerce.webp" alt="">
-        <div class="tile-label"><span class="name">Commerce</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile empty" href="categories/Politique.html" style="--tile-ratio:403/130; --label-x:11%; --label-y:46%;">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Politique.webp" alt="Politique">
-        <div class="tile-label"><span class="name">Politique</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile empty" href="categories/Religion.html" style="--tile-ratio:406/130; --label-x:11%; --label-y:46%;">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Religions.webp" alt="Religion">
-        <div class="tile-label"><span class="name">Religion</span><span class="status">— Explorer —</span></div>
-      </a>
-      <a class="cat-tile ready" href="categories/Regles.html" style="--tile-color:#c9b285; --tile-ratio:396/130; --label-x:11%; --label-y:46%;">
-        <img class="tile-img" loading="lazy" decoding="async" src="img/titles/Regle_jdr.webp" alt="Règles du JDR">
-        <div class="tile-label"><span class="name">Règles</span><span class="status">— Explorer —</span></div>
-      </a>
-    </div>
-   </div>
-  </div>
+  <!-- ========== LE CODEX : carrousel 3D ========== -->
+  <section id="categories" class="h-section h-codex">
+    <header class="h-heading" data-reveal>
+      <p class="h-heading-small">Parcourir</p>
+      <h2 class="h-heading-big">Le Codex</h2>
+    </header>
 
-  <section id="apropos" class="closing content-panel" style="border-top:1px solid var(--line);">
-    <div class="closing-inner">
-      <div class="kicker"><span class="num">❧</span>Ce que ça change</div>
-      <h2>Il n'existe pas une seule façon de devenir puissant</h2>
-      <p>Un noble peut naître avec un Sang exceptionnel. Un paysan peut recevoir une Veine par Rituel. Un fou peut vendre sa mémoire pour obtenir une Veine précise.</p>
-      <p>Et un vieux maître d'armes peut tuer tous les précédents avec une simple épée.</p>
-      <p class="final">De quoi donner à chaque personnage — et à chaque faction — une raison différente d'exister.</p>
+    <div class="cf" id="codexCarousel" data-reveal>
+      <div class="cf-stage" tabindex="0" aria-roledescription="carrousel" aria-label="Catégories du Codex">
+        <a class="cf-card" href="categories/Pouvoirs.html" style="--c:#8f5fd6;" data-sub="Les forces des Veines">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/><path d="M19 2.5v3M17.5 4h3"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Pouvoirs</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">La puissance surnaturelle de ce monde repose sur les Veines, des forces fondamentales qui parcourent la terre et ceux qui l'habitent.</p>
+            <p class="cf-meta">✦ Douze Veines · rangs et éveils</p>
+          </div>
+        </a>
+        <a class="cf-card" href="categories/Combat.html" style="--c:#c22f38;" data-sub="L'Art des armes">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l11 11M13 17l4-4M17 17l3 3"/><path d="M20 4L9 15M7 13l4 4M7 17l-3 3"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Combat</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">Pas de mana, pas de magie : de l'entraînement. Chaque arme possède son propre Art, qui progresse en sept rangs.</p>
+            <p class="cf-meta">✦ Sept rangs de maîtrise</p>
+          </div>
+        </a>
+        <a class="cf-card" href="categories/Bestiaire.html" style="--c:#4f7a6a;" data-sub="Créatures du monde">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.5" cy="10" r="1.7"/><circle cx="10" cy="6" r="1.7"/><circle cx="14" cy="6" r="1.7"/><circle cx="17.5" cy="10" r="1.7"/><path d="M7.5 17.5c0-3 2-5.5 4.5-5.5s4.5 2.5 4.5 5.5c0 1.8-1.6 2.8-3 2.3a5 5 0 0 0-3 0c-1.4.5-3-.5-3-2.3z"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Bestiaire</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">Des bêtes paisibles des fermes aux prédateurs qui rôdent aux lisières, classées selon leur dangerosité pour les voyageurs.</p>
+            <p class="cf-meta">✦ Terrestres · Volants · Aquatiques · Insectes</p>
+          </div>
+        </a>
+        <a class="cf-card" href="categories/Personnages.html" style="--c:#9b7cc4;" data-sub="Figures et légendes">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Personnages</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">Les figures qui marquent l'histoire de Nocthémar — mortels, peuples anciens, ou entités devenues légendes.</p>
+            <p class="cf-meta">✦ Divinités · Peuples · Maître du Jeu</p>
+          </div>
+        </a>
+        <a class="cf-card" href="categories/Equipement.html" style="--c:#b08a4e;" data-sub="Sur la route">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3h4M10.5 3v5L6 16a3.5 3.5 0 0 0 3 5h6a3.5 3.5 0 0 0 3-5l-4.5-8V3"/><path d="M7.5 14h9"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Équipement</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">De la simple potion de soin aux objets plus spécialisés : chacun a un usage précis, à choisir selon la situation.</p>
+            <p class="cf-meta">✦ Potions · toniques · talismans</p>
+          </div>
+        </a>
+        <a class="cf-card is-soon" href="categories/Factions.html" style="--c:#7a6a5a;" data-sub="Alliances et rivalités">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V3"/><path d="M6 4h12l-3 4 3 4H6"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Factions</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">Ordres, guildes et maisons qui se disputent l'influence sur le royaume.</p>
+            <p class="cf-meta cf-soon">En cours d'écriture</p>
+          </div>
+        </a>
+        <a class="cf-card" href="categories/Lore.html" style="--c:#a8743a;" data-sub="Les quatre ères">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5.5c2.5-1 6-1 9 .5 3-1.5 6.5-1.5 9-.5V19c-2.5-1-6-1-9 .5-3-1.5-6.5-1.5-9-.5z"/><path d="M12 6v13.5"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Lore</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">De l'ancienne Union à la naissance des Veines, l'histoire de Nocthémar se raconte en quatre grandes ères.</p>
+            <p class="cf-meta">✦ Chroniques du monde</p>
+          </div>
+        </a>
+        <a class="cf-card" href="categories/Cartes.html" style="--c:#6a8a9a;" data-sub="Géographie">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Cartes</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">Le continent de Nocthémar se découvre région par région, carte après carte.</p>
+            <p class="cf-meta">✦ Régions du continent</p>
+          </div>
+        </a>
+        <a class="cf-card is-soon" href="categories/Commerce.html" style="--c:#c9a24e;" data-sub="Or et marchands">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M7 21h10M5 7h14"/><path d="M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Commerce</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">Routes marchandes, monnaies et comptoirs : ce qui s'achète, et ce qui se paie autrement.</p>
+            <p class="cf-meta cf-soon">En cours d'écriture</p>
+          </div>
+        </a>
+        <a class="cf-card is-soon" href="categories/Politique.html" style="--c:#8a3a40;" data-sub="Trônes et intrigues">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Politique</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">Ceux qui gouvernent, ceux qui conspirent, et les équilibres fragiles qui tiennent le royaume.</p>
+            <p class="cf-meta cf-soon">En cours d'écriture</p>
+          </div>
+        </a>
+        <a class="cf-card is-soon" href="categories/Religion.html" style="--c:#5a74a8;" data-sub="Cultes et croyances">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5c1.4 1.8 1.4 3.3 0 4.6-1.4-1.3-1.4-2.8 0-4.6z"/><rect x="9" y="9" width="6" height="12" rx="1"/><path d="M5.5 21h13"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Religion</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">Les dieux que l'on prie, ceux que l'on craint, et les temples bâtis à leur gloire.</p>
+            <p class="cf-meta cf-soon">En cours d'écriture</p>
+          </div>
+        </a>
+        <a class="cf-card" href="categories/Regles.html" style="--c:#c9b285;" data-sub="Règles du JDR">
+          <div class="cf-art"><span class="cf-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12,2 21,7 21,17 12,22 3,17 3,7"/><polygon points="12,7.5 16.5,15 7.5,15"/><path d="M12 2v5.5M21 7l-4.5 8M3 7l4.5 8M12 22l-4.5-7M12 22l4.5-7"/></svg></span></div>
+          <span class="cf-chip">Ouvrir <span aria-hidden="true">↗</span></span>
+          <div class="cf-body">
+            <div class="cf-head"><h3>Règles</h3><span class="cf-count"></span></div>
+            <p class="cf-desc">Le MJ décrit le monde, les joueurs agissent — et quand l'issue est incertaine, c'est le dé qui tranche.</p>
+            <p class="cf-meta">✦ Jets, tests et déroulement</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Pilule de navigation (miniature + titre + flèches) -->
+      <div class="cf-dock">
+        <a class="cf-dock-main" href="categories/Pouvoirs.html">
+          <span class="cf-dock-thumb"></span>
+          <span class="cf-dock-text">
+            <span class="cf-dock-name">Pouvoirs</span>
+            <span class="cf-dock-sub">Section 1 sur 12</span>
+          </span>
+        </a>
+        <div class="cf-arrows">
+          <button type="button" class="cf-arrow" data-dir="-1" aria-label="Catégorie précédente">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <button type="button" class="cf-arrow" data-dir="1" aria-label="Catégorie suivante">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="cf-dots" role="tablist" aria-label="Choisir une catégorie"></div>
     </div>
   </section>
 
-  <section id="d20" class="dice-panel content-panel" style="border-top:1px solid var(--line);">
-    <div class="kicker" style="justify-content:center;"><span class="num">🎲</span>Pour le plaisir</div>
-    <h2 class="title">Lance le dé du Destin</h2>
-    <p class="lede no-drop" style="margin:0 auto 2em; text-align:center;">Un vingt tout nu, comme à la table de jeu.</p>
+  <!-- ========== À PROPOS ========== -->
+  <section id="apropos" class="h-section h-about">
+    <div class="h-glass h-about-card" data-reveal>
+      <p class="h-heading-small">Ce que ça change</p>
+      <h2>Il n'existe pas une seule façon de devenir puissant</h2>
+      <div class="h-divider h-divider-center"><span></span><i></i><span></span></div>
+      <p>Un noble peut naître avec un Sang exceptionnel. Un paysan peut recevoir une Veine par Rituel. Un fou peut vendre sa mémoire pour obtenir une Veine précise.</p>
+      <p>Et un vieux maître d'armes peut tuer tous les précédents avec une simple épée.</p>
+      <p class="h-about-final">De quoi donner à chaque personnage — et à chaque faction — une raison différente d'exister.</p>
+    </div>
+  </section>
+
+  <!-- ========== DÉ DU DESTIN ========== -->
+  <section id="d20" class="h-section dice-panel" data-reveal>
+    <header class="h-heading">
+      <p class="h-heading-small">Tente</p>
+      <h2 class="h-heading-big">Le Destin</h2>
+    </header>
+    <p class="h-dice-lede">Un vingt tout nu, comme à la table de jeu.</p>
     <button type="button" class="d20-die" id="d20Die" aria-label="Lancer le dé à 20 faces">
       <svg class="d20-svg" viewBox="0 0 200 200" aria-hidden="true">
         <polygon class="d20-facet d20-facet-l" points="100,12 176.2,56 132.9,81 100,62"></polygon>
@@ -142,7 +249,7 @@
     <p class="d20-result" id="d20Result">Clique sur le dé pour tenter ta chance.</p>
   </section>
 
-  <footer class="content-panel">
+  <footer class="h-footer" data-reveal>
     <section class="credits" aria-labelledby="credits-title">
       <h2 class="credits-title" id="credits-title">Crédits — Nocthemar</h2>
       <p class="credits-intro">Un univers façonné à deux, avec des rôles complémentaires.</p>
@@ -159,7 +266,7 @@
 <script src="JS/embers.js"></script>
 <script src="JS/search.js"></script>
 <script src="JS/dice.js"></script>
-<script src="JS/card-tilt.js"></script>
+<script src="JS/accueil.js"></script>
 <script type="module" src="JS/auth.js"></script>
 </body>
 </html>

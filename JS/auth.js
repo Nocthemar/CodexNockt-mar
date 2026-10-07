@@ -15,9 +15,9 @@ async function afficher() {
   // --- Pas connecté ---
   if (!joueur) {
     zone.innerHTML = `
-      <button type="button" class="btn-discord">
+      <button type="button" class="btn-discord" aria-label="Connecter Discord">
         <span class="btn-discord__logo" aria-hidden="true"></span>
-        Connecter Discord
+        <span class="btn-discord__texte">Connecter Discord</span>
       </button>`;
     zone.querySelector('button').addEventListener('click', connexionDiscord);
     return;
