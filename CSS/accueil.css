@@ -18,6 +18,8 @@
 /* Deux couches de la même image : nette sur le héros, floutée/assombrie
    au défilement (opacité réglée directement par JS/accueil.js) */
 .home .page-bg{ background-attachment:scroll; }
+/* image nette assombrie (la couche floutée a son propre réglage ci-dessous) */
+.home .page-bg:not(.page-bg-blur){ filter:brightness(0.62); }
 .home .page-bg-blur{
   filter:blur(22px) brightness(0.45) saturate(1.1);
   background-attachment:scroll;
@@ -127,14 +129,26 @@
 }
 
 /* ---------- HÉROS ---------- */
-/* Mise en page d'origine (classes .hero-* de CSS/index.css) : texte à gauche.
+/* Classes .hero-* de CSS/index.css, recentrées au milieu de l'écran.
    Ajustements pour la topbar flottante et l'entrée animée. */
 .home .hero-photo{
   min-height:100vh;
   min-height:100svh;
   padding-top:80px; /* place de la topbar flottante */
+  align-items:center;
+  justify-content:center;
+  text-align:center;
 }
-.home .hero-photo-content{ padding-top:0; padding-bottom:4vw; animation:heroIn 1.1s var(--ease-out) both; }
+.home .hero-photo-content{
+  padding-top:0; padding-bottom:4vw;
+  max-width:760px;
+  display:flex; flex-direction:column; align-items:center;
+  animation:heroIn 1.1s var(--ease-out) both;
+}
+.home .hero-v2-title{ font-size:clamp(2.4em, 6vw, 4.8em); }
+.home .hero-divider{ width:14em; }
+.home .hero-photo .hero-sub{ margin-inline:auto; }
+.home .hero-quote{ border-left:none; padding-left:0; margin-inline:auto; }
 @keyframes heroIn{
   from{ opacity:0; transform:translateY(24px); }
   to{ opacity:1; transform:none; }
