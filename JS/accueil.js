@@ -96,8 +96,7 @@
     dock.style.setProperty('--ac', ac);
     dotsWrap.style.setProperty('--ac', ac);
     dockMain.href = cur.getAttribute('href');
-    const img = cur.querySelector('.cf-img');
-    dockThumb.innerHTML = img ? '<img src="' + img.getAttribute('src') + '" alt="">' : cur.querySelector('.cf-icon').innerHTML;
+    dockThumb.innerHTML = cur.querySelector('.cf-icon').innerHTML;
     dockName.textContent = cur.querySelector('h3').textContent;
     dockSub.textContent = 'Section ' + (active + 1) + ' sur ' + n;
   }

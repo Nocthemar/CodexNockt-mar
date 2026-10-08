@@ -398,9 +398,7 @@
   transition:border-color .6s ease, box-shadow .6s ease;
 }
 .cf-dock-thumb{ display:flex; align-items:center; justify-content:center; color:color-mix(in srgb, var(--ac) 70%, #fff); }
-.cf-dock-thumb svg{ width:24px; height:24px; }
-.cf-dock-thumb img{ width:100%; height:100%; object-fit:cover; object-position:50% 30%; }
-.cf-dock-text{ display:flex; flex-direction:column; line-height:1.25; min-width:0; }
+.cf-dock-thumb svg{ width:24px; height:24px; }.cf-dock-text{ display:flex; flex-direction:column; line-height:1.25; min-width:0; }
 .cf-dock-name{ font-family:"Cinzel","Cinzel Repli", serif; font-weight:600; font-size:1em; white-space:nowrap; }
 .cf-dock-sub{ font-size:0.82em; color:var(--parchment-dim); white-space:nowrap; }
 .cf-arrows{ display:flex; gap:8px; flex-shrink:0; }
