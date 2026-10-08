@@ -7,15 +7,16 @@
   <link rel="icon" type="image/png" href="img/Logo/Nocthemar_logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="CSS/polices.css">
   <link rel="stylesheet" href="CSS/index.css">
   <link rel="stylesheet" href="CSS/search.css">
   <link rel="stylesheet" href="CSS/compte.css">
   <link rel="stylesheet" href="CSS/cartes-jeu.css">
   <link rel="stylesheet" href="CSS/carte-infos.css">
+  <link rel="stylesheet" href="CSS/profil.css">
 </head>
-<body class="page-profil">
+<body class="page-profil page-fiche">
 
   <header class="topbar">
     <a class="brand" href="index.html">Nocthémar</a>
@@ -44,7 +45,7 @@
     <!-- Pas connecté -->
     <section id="non-connecte" class="carte centre" hidden>
       <h2>Ton profil de joueur</h2>
-      <p>Connecte-toi avec Discord pour voir ta fiche, tes pièces et ton inventaire.</p>
+      <p>Connecte-toi avec Discord pour voir ton deck, tes cartes et tes pièces.</p>
       <button id="btn-connexion" type="button" class="btn-discord">
         <span class="btn-discord__logo" aria-hidden="true"></span>
         Connecter Discord
@@ -54,10 +55,13 @@
     <!-- Profil -->
     <div id="profil" hidden>
 
+      <!-- Bandeau du registre (décor) -->
+      <p class="fiche-sur" aria-hidden="true"><span></span>Registre des aventuriers de Nocthémar<span></span></p>
+
       <section class="entete">
         <div id="banniere" class="entete__banniere"></div>
         <div class="entete__infos">
-          <img id="avatar" class="entete__avatar" alt="">
+          <div class="entete__medaillon"><img id="avatar" class="entete__avatar" alt=""></div>
           <div>
             <h1 id="pseudo"></h1>
             <p id="titre" class="entete__titre"></p>
@@ -65,13 +69,41 @@
         </div>
       </section>
 
-      <section class="carte">
-        <h2>Personnage actif</h2>
-        <div id="perso"></div>
+      <!-- Duel : visible uniquement sur son propre profil, avec les cartes du deck en éventail -->
+      <section id="duel" class="carte duel" hidden>
+        <div class="duel__texte">
+          <span class="duel__sur">Jeu de cartes</span>
+          <h2 class="duel__titre">Duel des Couronnes</h2>
+          <p class="duel__accroche">Ton deck <strong id="duel-deck">Deck de cartes</strong> mène tes troupes face à l'Ombre du Codex. Pose tes unités, sers-toi de tes objets de pouvoir, et que chaque coup se joue au d20.</p>
+          <ul class="duel__regles">
+            <li><span aria-hidden="true">◆</span> Énergie</li>
+            <li><span aria-hidden="true">⬡</span> Jets au d20</li>
+            <li><span aria-hidden="true">✦</span> Jet du Destin</li>
+          </ul>
+          <div class="duel__boutons">
+            <a class="duel__btn duel__btn--plein" href="jeu-cartes.html">
+              <span class="duel__btn-titre">Engager le duel</span>
+              <span class="duel__btn-texte">Seul, contre l'Ombre du Codex</span>
+            </a>
+          </div>
+        </div>
+        <a class="duel__eventail" href="jeu-cartes.html" aria-label="Jouer au Duel des Couronnes" id="duel-eventail"></a>
+      </section>
+
+      <!-- Deck de cartes : visible par tous, modifiable seulement sur son propre profil -->
+      <section class="carte deck">
+        <div id="deck"></div>
+        <a id="lien-collection" class="btn-collection" href="collection.html" hidden>Ouvrir ma collection</a>
+      </section>
+
+      <!-- Le duelliste : cartes et objets de pouvoir possédés, bourse. Visible uniquement sur son propre profil -->
+      <section id="duelliste" class="carte duelliste" hidden>
+        <h2>Le duelliste</h2>
+        <dl id="duelliste-stats" class="duelliste__stats"></dl>
 
         <div class="perso__bas">
-          <!-- Inventaire du personnage : 4 objets par page -->
-          <div id="perso-inventaire" class="stat perso__inventaire" hidden></div>
+          <!-- Les 7 objets de pouvoir du Duel : ceux qu'on possède en couleur, les autres grisés -->
+          <div id="objets-pouvoir" class="stat perso__inventaire"></div>
 
           <!-- Bourse : visible uniquement sur son propre profil -->
           <div id="bourse" class="perso__bourse" hidden>
@@ -83,44 +115,14 @@
         </div>
       </section>
 
-      <!-- Deck de cartes : visible par tous, modifiable seulement sur son propre profil -->
-      <section class="carte deck">
-        <div id="deck"></div>
-        <a id="lien-collection" class="btn-collection" href="collection.html" hidden>Ouvrir ma collection</a>
-      </section>
-
-      <!-- Duel des Veines : visible uniquement sur son propre profil, avec les cartes du deck en éventail -->
-      <section id="duel" class="carte duel" hidden>
-        <div class="duel__texte">
-          <span class="duel__sur">Jeu de cartes</span>
-          <h2 class="duel__titre">Le Duel des Veines</h2>
-          <p class="duel__accroche">Ton deck <strong id="duel-deck">Deck de cartes</strong> attend son premier adversaire. Trois cartes, un d20, et que le destin tranche.</p>
-          <ul class="duel__regles">
-            <li><span aria-hidden="true">◆</span> Essence</li>
-            <li><span aria-hidden="true">⬡</span> Jets au d20</li>
-            <li><span aria-hidden="true">✦</span> Roue des Veines</li>
-          </ul>
-          <div class="duel__boutons">
-            <a class="duel__btn duel__btn--plein" href="jeu-cartes.html">
-              <span class="duel__btn-titre">Contre l'Ombre</span>
-              <span class="duel__btn-texte">Seul, contre l'IA</span>
-            </a>
-            <a class="duel__btn" href="jeu-cartes.html?mode=ligne">
-              <span class="duel__btn-titre">Contre un ami</span>
-              <span class="duel__btn-texte">En ligne, avec ton grimoire</span>
-            </a>
-          </div>
-        </div>
-        <a class="duel__eventail" href="jeu-cartes.html" aria-label="Jouer au Duel des Veines" id="duel-eventail"></a>
-      </section>
-
       <!-- Visible uniquement sur son propre profil : détails du compte, en dernier -->
       <div id="prive" hidden>
 
         <div class="grille">
-          <section class="carte">
+          <section class="carte carte--collection">
             <h2>Collection</h2>
-            <ul id="inventaire" class="liste liste--defilante"></ul>
+            <!-- Une colonne par type de cosmétique (bannières, thèmes, titres), remplie par profil.js -->
+            <div id="inventaire" class="collection-colonnes"></div>
           </section>
 
           <section class="carte">

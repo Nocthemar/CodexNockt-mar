@@ -1,11 +1,13 @@
 // =====================================================================
 //  Page profil
-//  profil.html           -> mon profil (avec pièces, inventaire, historique)
+//  Profil du joueur, consacré au Duel des Couronnes (jeu de cartes)
+//  profil.html           -> mon profil (deck, cartes, objets de pouvoir, pièces, cosmétiques)
 //  profil.html?id=12345  -> profil public d'un autre joueur (ID Discord)
 // =====================================================================
 import { supabase, connexionDiscord, getMonJoueur, SITE_ROOT } from './supabase.js';
 import { $, esc, couleur, LIBELLES, SOURCES } from './commun.js';
 import { chargerDeck, Deck, activerGlisser, htmlCarte } from './cartes.js';
+import { OBJETS, objetDepuisNom } from './jeu-cartes-moteur.js';
 
 // Le joueur + ses cosmétiques équipés, en une seule requête
 const SELECT_JOUEUR = `
@@ -45,13 +47,15 @@ async function init() {
   const estMoi = moi?.discord_id === discordId;
 
   afficherEntete(joueur);
-  await Promise.all([afficherPerso(discordId), afficherDeck(discordId, estMoi)]);
+  await afficherDeck(discordId, estMoi);
 
   // Partie privée : seulement sur mon propre profil
   if (estMoi) {
     $('prive').hidden = false;
+    $('duelliste').hidden = false;
     $('bourse').hidden = false;
     await Promise.all([
+      afficherDuelliste(discordId),
       afficherSolde(discordId),
       afficherInventaire(discordId, joueur),
       afficherHistorique(discordId),
@@ -85,265 +89,51 @@ function afficherEntete(j) {
     document.documentElement.style.setProperty('--accent', accent);
     // Thème à une seule couleur : accent2 reprend accent
     document.documentElement.style.setProperty('--accent2', couleur(j.theme.payload.accent2) ?? accent);
+    // Couleurs du thème reprises dans toute la page (CSS/profil.css : --vif, --vif2)
+    document.body.style.setProperty('--vif', accent);
+    document.body.style.setProperty('--vif2', couleur(j.theme.payload.accent2) ?? accent);
   }
 }
 
 
-// Le format de "data" est décidé par le bot : ces listes servent juste à
-// reconnaître les clés connues pour les mettre en valeur. Tout le reste
-// (clés inconnues) s'affiche quand même, dans une zone générique en bas.
-const CLE_CA = 'CA';
-const CLES_JAUGES = ['PV', 'XP'];
-const ATTRIBUTS = [
-  ['AGI', 'Agilité'], ['FOR', 'Force'], ['CON', 'Constitution'],
-  ['PER', 'Perception'], ['ESP', 'Esprit'], ['CHA', 'Charisme'],
-];
-const CLES_IDENTITE = ['RACE', 'GENRE', 'NIVEAU', 'VEINE'];
-const LIBELLES_IDENTITE = { RACE: 'Race', GENRE: 'Genre', NIVEAU: 'Niveau', VEINE: 'Veine' };
+// Le duelliste : cartes possédées et objets de pouvoir du Duel des Couronnes.
+// Les 7 objets sont toujours affichés : ceux qu'on possède en couleur, les autres grisés.
+async function afficherDuelliste(discordId) {
+  const [{ count: nbCartes }, { count: nbCatalogue }, { data: inventaire }] = await Promise.all([
+    supabase.from('player_cards').select('card_id', { count: 'exact', head: true }).eq('discord_id', discordId),
+    supabase.from('cards').select('id', { count: 'exact', head: true }).eq('is_available', true),
+    supabase.from('inventory').select('item:items(name)').eq('discord_id', discordId),
+  ]);
+  const possedes = new Set((inventaire ?? []).map(({ item }) => item && objetDepuisNom(item.name)?.id).filter(Boolean));
 
-// Enlève les accents pour comparer "RÊVE" et "REVE" sans se soucier de la casse
-const normaliser = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toUpperCase();
+  $('duelliste-stats').innerHTML = [
+    ['Cartes', `${nbCartes ?? 0}${nbCatalogue ? ` / ${nbCatalogue}` : ''}`],
+  ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
 
-const VIDE_RE = /^(—|-|vide|aucun[e]?|n\/a)$/i;
-
-function analyserFraction(val) {
-  const m = String(val).match(/^\s*(-?\d+(?:[.,]\d+)?)\s*\/\s*(-?\d+(?:[.,]\d+)?)\s*$/);
-  if (!m) return null;
-  const actuel = parseFloat(m[1].replace(',', '.'));
-  const max = parseFloat(m[2].replace(',', '.'));
-  return { actuel, max, pct: max > 0 ? Math.min(100, Math.max(0, (actuel / max) * 100)) : 0 };
-}
-
-async function afficherPerso(discordId) {
-  const { data: perso } = await supabase
-    .from('characters')
-    .select('*')
-    .eq('discord_id', discordId)
-    .eq('is_active', true)
-    .maybeSingle();
-
-  const zone = $('perso');
-
-  if (!perso) {
-    zone.innerHTML = `<p class="vide">Aucun personnage actif pour l'instant. La fiche se crée sur Discord, avec le bot.</p>`;
-    return;
-  }
-
-  const data = perso.data || {};
-  const clesRestantes = new Set(Object.keys(data));
-  const trouverCle = (nom) => {
-    const cle = [...clesRestantes].find((c) => normaliser(c) === normaliser(nom));
-    if (cle) clesRestantes.delete(cle);
-    return cle;
-  };
-
-  // Sous-titre : Race · Genre · Niveau, seulement les infos présentes
-  const sousTitre = ['RACE', 'GENRE', 'NIVEAU']
-    .map((nom) => {
-      const cle = [...clesRestantes].find((c) => normaliser(c) === nom) ?? Object.keys(data).find((c) => normaliser(c) === nom);
-      const val = cle ? data[cle] : null;
-      return val && !VIDE_RE.test(String(val)) ? (nom === 'NIVEAU' ? `Niveau ${esc(val)}` : esc(val)) : null;
-    })
-    .filter(Boolean)
-    .join(' · ');
-
-  // Jauges : CA en badge, PV/XP en barres si elles ont un format "x / y"
-  let jaugesHtml = '';
-  const cleCA = trouverCle(CLE_CA);
-  if (cleCA) {
-    jaugesHtml += `
-      <div class="jauge jauge--badge jauge--ca">
-        <span class="jauge__label">${esc(cleCA)}</span>
-        <span class="jauge__valeur">${esc(data[cleCA])}</span>
-      </div>`;
-  }
-  for (const nom of CLES_JAUGES) {
-    const cle = trouverCle(nom);
-    if (!cle) continue;
-    const val = data[cle];
-    const frac = analyserFraction(val);
-    if (frac) {
-      jaugesHtml += `
-        <div class="jauge jauge--barre jauge--${nom.toLowerCase()}">
-          <div class="jauge__tete">
-            <span class="jauge__label">${esc(cle)}</span>
-            <span class="jauge__valeur">${esc(val)}</span>
-          </div>
-          <div class="jauge__piste"><div class="jauge__remplissage" style="width:${frac.pct}%"></div></div>
-        </div>`;
-    } else {
-      jaugesHtml += `
-        <div class="jauge jauge--badge">
-          <span class="jauge__label">${esc(cle)}</span>
-          <span class="jauge__valeur">${esc(val)}</span>
-        </div>`;
-    }
-  }
-
-  // Attributs : toujours dans le même ordre, avec libellé complet en infobulle
-  let attributsHtml = '';
-  for (const [nom, libelle] of ATTRIBUTS) {
-    const cle = trouverCle(nom);
-    if (!cle) continue;
-    const val = String(data[cle]);
-    const signe = /^\s*-/.test(val) ? 'neg' : /^\s*\+?0+\s*$/.test(val) ? 'neutre' : 'pos';
-    attributsHtml += `
-      <div class="attribut attribut--${signe}" title="${esc(libelle)}">
-        <span class="attribut__valeur">${esc(val)}</span>
-        <span class="attribut__label">${esc(nom)}</span>
-      </div>`;
-  }
-
-  // Identité : Veine (Race, Genre, Niveau sont déjà dans le sous-titre)
-  let identiteHtml = '';
-  for (const nom of ['VEINE']) {
-    const cle = trouverCle(nom);
-    if (!cle) continue;
-    const val = data[cle];
-    const estVide = VIDE_RE.test(String(val));
-    identiteHtml += `
-      <span class="chip${estVide ? ' chip--vide' : ''}">
-        <span class="chip__label">${esc(LIBELLES_IDENTITE[nom])}</span>
-        <span class="chip__valeur">${esc(val)}</span>
-      </span>`;
-  }
-  // Retire aussi Race/Genre/Niveau du reliquat, même s'ils n'ont pas de chip dédiée,
-  // ainsi qu'un éventuel ancien champ Héritage (l'Héritage de Sang n'existe plus dans l'univers)
-  ['RACE', 'GENRE', 'NIVEAU', 'HERITAGE'].forEach(trouverCle);
-
-  // Inventaire : sorti de la grille générique pour s'afficher à côté de la bourse
-  const cleInventaire = trouverCle('INVENTAIRE');
-  if (cleInventaire) afficherInventairePerso(cleInventaire, data[cleInventaire]);
-
-  // Tout ce qui n'est pas reconnu ci-dessus : affiché tel quel, sans mise en forme spéciale.
-  // Une valeur "Objet A, Objet B, Objet C" est éclatée en liste pour rester lisible.
-  const autresHtml = [...clesRestantes]
-    .map((cle) => {
-      const val = data[cle];
-      const elements = typeof val === 'string' ? val.split(',').map((v) => v.trim()).filter(Boolean) : [];
-      const dd = elements.length > 1
-        ? `<dd><ul class="stat__liste">${elements.map((el) => `<li>${esc(el)}</li>`).join('')}</ul></dd>`
-        : `<dd>${esc(typeof val === 'object' ? JSON.stringify(val) : val)}</dd>`;
-      return `
-      <div class="stat">
-        <dt>${esc(cle)}</dt>
-        ${dd}
-      </div>`;
-    })
-    .join('');
-
-  zone.innerHTML = `
-    <div class="perso__entete">
-      <h3 class="perso__nom">${esc(perso.name)}</h3>
-      ${sousTitre ? `<p class="perso__sous-titre">${sousTitre}</p>` : ''}
-    </div>
-    ${jaugesHtml ? `<div class="perso__jauges">${jaugesHtml}</div>` : ''}
-    ${attributsHtml ? `<div class="perso__attributs">${attributsHtml}</div>` : ''}
-    ${identiteHtml ? `<div class="perso__identite">${identiteHtml}</div>` : ''}
-    ${autresHtml ? `<dl class="stats stats--autres">${autresHtml}</dl>` : ''}
-    ${!jaugesHtml && !attributsHtml && !identiteHtml && !autresHtml ? '<p class="vide">Fiche encore vide.</p>' : ''}`;
-}
-
-
-// Inventaire du personnage : OBJETS_PAR_PAGE objets affichés, un bouton en bas fait défiler les suivants
-const OBJETS_PAR_PAGE = 4;
-
-// Objet affiché en image (img/Equipement/<nom>.webp, apostrophe typographique comme les fichiers),
-// nom en infobulle. Si l'image n'existe pas, on retombe sur le texte.
-function htmlObjetInventaire(nom, choisi) {
-  const src = new URL(`img/Equipement/${nom.replace(/'/g, '’')}.webp`, SITE_ROOT);
-  return `
-    <li>
-      <button type="button" class="objet-image${choisi ? ' objet-image--choisi' : ''}" data-objet="${esc(nom)}"
-              title="${esc(nom)}" aria-pressed="${choisi}">
-        <img src="${esc(src)}" alt="${esc(nom)}" loading="lazy"
-             onerror="this.parentElement.classList.add('objet-image--sans');this.remove()">
-        <span class="objet-image__nom">${esc(nom)}</span>
-      </button>
-    </li>`;
-}
-
-// Fiches des objets (type, catégorie, prix, description), lues une seule fois sur la page
-// Équipement du Codex : une seule source à tenir à jour.
-const cleObjet = (nom) => normaliser(nom).replace(/[’']/g, "'");
-let fichesObjets;
-function chargerFichesObjets() {
-  fichesObjets ??= fetch(new URL('categories/Equipement.html', SITE_ROOT))
-    .then((r) => (r.ok ? r.text() : ''))
-    .then((html) => {
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const fiches = new Map();
-      for (const ligne of doc.querySelectorAll('.shop-row')) {
-        const nom = ligne.querySelector('.shop-name')?.textContent.trim();
-        if (!nom) continue;
-        fiches.set(cleObjet(nom), {
-          categorie: ligne.closest('section')?.querySelector('.subtitle')?.textContent.trim(),
-          type: ligne.querySelector('.shop-tag')?.textContent.trim(),
-          prix: ligne.querySelector('.shop-price')?.textContent.trim(),
-          description: ligne.querySelector('.shop-desc')?.textContent.trim(),
-        });
-      }
-      return fiches;
-    })
-    .catch(() => new Map());
-  return fichesObjets;
-}
-
-function htmlFicheObjet(nom, fiche) {
-  const carac = [
-    ['Type', fiche?.type],
-    ['Catégorie', fiche?.categorie],
-    ['Prix', fiche?.prix],
-  ].filter(([, v]) => v);
-  return `
-    <div class="objet-fiche">
-      <strong class="objet-fiche__nom">${esc(nom)}</strong>
-      ${carac.length ? `<dl class="objet-fiche__carac">${carac.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>` : ''}
-      <p class="objet-fiche__desc">${fiche?.description ? esc(fiche.description) : 'Aucune description pour cet objet.'}</p>
-    </div>`;
-}
-
-function afficherInventairePerso(cle, val) {
-  const objets = (Array.isArray(val) ? val.map(String) : String(val ?? '').split(','))
-    .map((v) => v.trim())
-    .filter((v) => v && !VIDE_RE.test(v));
-
-  const zone = $('perso-inventaire');
-  zone.hidden = false;
-
-  if (!objets.length) {
-    zone.innerHTML = `<dt>${esc(cle)}</dt><dd class="vide">Inventaire vide.</dd>`;
-    return;
-  }
-
-  const nbPages = Math.ceil(objets.length / OBJETS_PAR_PAGE);
-  let page = 0;
-  let choisi = null;        // objet dont la fiche est ouverte (un clic l'ouvre, un 2e la ferme)
-  let fiches = new Map();
-
+  const zone = $('objets-pouvoir');
+  let choisi = null;   // objet dont l'effet est affiché (un clic l'ouvre, un 2e le ferme)
   const rendre = () => {
-    const debut = page * OBJETS_PAR_PAGE;
+    const o = OBJETS.find((x) => x.id === choisi);
     zone.innerHTML = `
-      <dt>${esc(cle)}</dt>
-      <dd><ul class="stat__liste stat__liste--images">${objets.slice(debut, debut + OBJETS_PAR_PAGE).map((o) => htmlObjetInventaire(o, o === choisi)).join('')}</ul></dd>
-      ${choisi ? htmlFicheObjet(choisi, fiches.get(cleObjet(choisi))) : ''}
-      ${nbPages > 1 ? `
-        <button type="button" class="btn-petit btn-petit--lien perso__inventaire-suite">
-          ${page < nbPages - 1 ? 'Objets suivants ▾' : 'Retour au début ▴'} (${page + 1}/${nbPages})
-        </button>` : ''}`;
+      <dt>Objets de pouvoir <span class="duelliste__compte">${possedes.size} / ${OBJETS.length}</span></dt>
+      <dd><ul class="stat__liste stat__liste--images">${OBJETS.map((x) => `
+        <li>
+          <button type="button" class="objet-image${x.id === choisi ? ' objet-image--choisi' : ''}${possedes.has(x.id) ? '' : ' objet-image--manque'}"
+                  data-objet="${x.id}" title="${esc(x.n)}${possedes.has(x.id) ? '' : ' (pas encore possédé)'}" aria-pressed="${x.id === choisi}">
+            <img src="${esc(new URL(x.image, SITE_ROOT))}" alt="${esc(x.n)}" loading="lazy">
+          </button>
+        </li>`).join('')}</ul></dd>
+      ${o ? `
+        <div class="objet-fiche">
+          <strong class="objet-fiche__nom">${esc(o.n)}</strong>
+          <dl class="objet-fiche__carac"><div><dt>Coût</dt><dd>${o.c} énergie</dd></div><div><dt>Statut</dt><dd>${possedes.has(o.id) ? 'Dans ta besace' : 'Pas encore possédé'}</dd></div></dl>
+          <p class="objet-fiche__desc">${esc(o.d)}</p>
+        </div>` : ''}`;
   };
-
-  zone.onclick = async (e) => {
-    const objet = e.target.closest('[data-objet]');
-    if (objet) {
-      choisi = objet.dataset.objet === choisi ? null : objet.dataset.objet;
-      if (choisi) fiches = await chargerFichesObjets();
-      rendre();
-      return;
-    }
-    if (!e.target.closest('.perso__inventaire-suite')) return;
-    page = (page + 1) % nbPages;
-    choisi = null;
+  zone.onclick = (e) => {
+    const b = e.target.closest('[data-objet]');
+    if (!b) return;
+    choisi = b.dataset.objet === choisi ? null : b.dataset.objet;
     rendre();
   };
   rendre();
@@ -367,7 +157,7 @@ async function afficherDeck(discordId, estMoi) {
 }
 
 
-// Encart du Duel des Veines : les 3 premières cartes du deck en éventail
+// Encart du Duel des Couronnes : les 3 premières cartes du deck en éventail
 // (dos de carte pour les places vides)
 function afficherDuel(nomDeck, cartesDeck) {
   $('duel-deck').textContent = nomDeck;
@@ -481,7 +271,7 @@ async function afficherInventaire(discordId, joueur) {
     .eq('discord_id', discordId)
     .order('acquired_at', { ascending: false });
 
-  // Les objets "rp" vivent déjà dans l'inventaire du personnage géré par le bot
+  // Les objets "rp" sont les objets de pouvoir du Duel : affichés dans « Le duelliste »
   const objets = (data ?? []).filter(({ item }) => item.kind !== 'rp');
 
   const zone = $('inventaire');
@@ -493,7 +283,10 @@ async function afficherInventaire(discordId, joueur) {
 
   const equipes = [joueur.banner_item_id, joueur.title_item_id, joueur.theme_item_id];
 
-  zone.innerHTML = objets.map(({ quantity, item }) => {
+  // Dans sa colonne, « Bannière « Les Veines » » devient « Les Veines » (la colonne dit déjà le type)
+  const nomCourt = (nom) => nom.replace(/^(bannière|thème|titre)\s*«\s*(.+?)\s*»$/i, '$2');
+
+  const htmlObjet = ({ quantity, item }, avecType) => {
     let action = '';
     if (COSMETIQUES.includes(item.kind)) {
       action = equipes.includes(item.id)
@@ -503,14 +296,37 @@ async function afficherInventaire(discordId, joueur) {
     return `
       <li class="objet">
         <div>
-          <span class="objet__type">${esc(LIBELLES[item.kind] ?? item.kind)}</span>
-          <strong>${esc(item.name)}</strong>${quantity > 1 ? ` <span class="objet__qte">×${quantity}</span>` : ''}
+          ${avecType ? `<span class="objet__type">${esc(LIBELLES[item.kind] ?? item.kind)}</span>` : ''}
+          <strong>${esc(avecType ? item.name : nomCourt(item.name))}</strong>${quantity > 1 ? ` <span class="objet__qte">×${quantity}</span>` : ''}
         </div>
         ${action}
       </li>`;
-  }).join('');
+  };
 
-  limiterHauteur(zone, 3);
+  // Une colonne par cosmétique équipable ; les autres types (fonds, accès…) dans « Divers » s'il y en a
+  const COLONNES = [['banner', 'Bannières', 'Aucune bannière'], ['theme', 'Thèmes', 'Aucun thème'], ['title', 'Titres', 'Aucun titre']];
+  const divers = objets.filter(({ item }) => !COSMETIQUES.includes(item.kind));
+  const colonnes = COLONNES.map(([kind, titre, vide]) => {
+    const liste = objets.filter(({ item }) => item.kind === kind);
+    return `
+      <div class="collection-colonne">
+        <h3 class="collection-colonne__titre">${titre} <span>${liste.length}</span></h3>
+        ${liste.length
+          ? `<ul class="liste liste--defilante">${liste.map((o) => htmlObjet(o, false)).join('')}</ul>`
+          : `<p class="vide">${vide}</p>`}
+      </div>`;
+  });
+  if (divers.length) {
+    colonnes.push(`
+      <div class="collection-colonne">
+        <h3 class="collection-colonne__titre">Divers <span>${divers.length}</span></h3>
+        <ul class="liste liste--defilante">${divers.map((o) => htmlObjet(o, true)).join('')}</ul>
+      </div>`);
+  }
+  zone.innerHTML = colonnes.join('');
+
+  // 2 objets visibles par colonne, les suivants se font défiler (molette ou glisser)
+  zone.querySelectorAll('.liste--defilante').forEach((liste) => limiterHauteur(liste, 2));
 }
 
 

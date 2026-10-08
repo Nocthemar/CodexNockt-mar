@@ -245,7 +245,7 @@ body.glisser-actif, body.glisser-actif * { cursor: grabbing !important; }
 .btn-collection:hover { background: var(--accent); color: var(--fond); }
 
 
-/* ---------- Encart « Duel des Veines » du profil ---------- */
+/* ---------- Encart « Duel » du profil ---------- */
 .carte.duel {
   position: relative;
   overflow: hidden;

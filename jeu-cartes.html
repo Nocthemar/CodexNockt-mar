@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Duel des Veines — Nocthémar</title>
+  <title>Duel des Couronnes — Nocthémar</title>
   <link rel="icon" type="image/png" href="img/Logo/Nocthemar_logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,12 +12,17 @@
   <link rel="stylesheet" href="CSS/index.css">
   <link rel="stylesheet" href="CSS/search.css">
   <link rel="stylesheet" href="CSS/compte.css">
-  <link rel="stylesheet" href="CSS/cartes-jeu.css">
-  <link rel="stylesheet" href="CSS/carte-infos.css">
   <link rel="stylesheet" href="CSS/jeu-cartes.css">
 </head>
 <body class="page-profil page-jeu">
-<canvas id="embers"></canvas>
+
+  <!-- Décor : forteresse low poly, brume, grain de film (profondeur à la souris) -->
+  <div class="scene" id="scene" aria-hidden="true">
+    <div class="scene__fond"></div>
+    <div class="scene__brume"></div>
+    <div class="scene__brume scene__brume--2"></div>
+    <div class="scene__grain"></div>
+  </div>
 
   <header class="topbar">
     <a class="brand" href="index.html">Nocthémar</a>
@@ -41,31 +46,11 @@
 
   <main class="jeu-wrap">
 
-    <!-- ===== Écran 1 : choix des cartes ===== -->
-    <div id="ecran-choix">
-      <header class="jeu-entete">
-        <span class="jeu-entete__sur">Jeu de cartes de Nocthémar</span>
-        <h1>Le Duel des Veines</h1>
-        <div class="ornement" aria-hidden="true"><span></span><i></i><span></span></div>
-        <p>Choisis trois cartes et affronte l'Ombre du Codex ou un ami. Chaque coup se joue au d20 : que le destin te soit favorable.</p>
-      </header>
-
-      <details class="regles">
-        <summary>Règles du duel</summary>
-        <div class="regles__corps">
-          <ul>
-            <li><strong>Trois cartes par camp.</strong> Elles entrent dans l'arène dans l'ordre où tu les as choisies. Quand une carte tombe à 0 PV, la suivante prend sa place.</li>
-            <li><strong>Points de vie</strong> selon la rareté (de Commune à Transcendante) et le rang (le Rang I est le plus robuste).</li>
-            <li><strong>Essence ◆</strong> : +1 au début de chacun de tes tours (6 au plus). Chaque attaque coûte de l'essence, la 2e attaque bien plus que la 1re.</li>
-            <li><strong>Parer</strong> : ne coûte rien, rapporte 1 essence de plus et divise par deux la prochaine attaque reçue.</li>
-            <li><strong>Le d20</strong> : 1 = échec, 2 à 5 = coup effleuré (×0,75), 16 à 19 = coup puissant (×1,25), 20 = critique (×1,5).</li>
-            <li><strong>La roue des Veines</strong> : chaque Veine domine la suivante (×1,3) et craint la précédente (×0,8).<br>
-              <span id="roue" class="regles__roue"></span></li>
-            <li><strong>Effets des Veines</strong> : chaque attaque qui touche déclenche l'effet de sa Veine (survole une attaque pour le lire).</li>
-          </ul>
-        </div>
-      </details>
-
+    <!-- ===== Accueil ===== -->
+    <section class="accueil" id="ecran-accueil">
+      <span class="accueil__sur">Jeu de cartes de Nocthémar</span>
+      <h1 class="accueil__titre">Duel des Couronnes</h1>
+      <p class="accueil__texte">Fais tomber les 20 PV de l'Ombre du Codex avant qu'elle ne fasse tomber les tiens. Pose tes troupes, lance tes sorts, et que chaque coup se joue au d20.</p>
       <!-- Mode de jeu -->
       <div class="modes" role="tablist" aria-label="Mode de jeu">
         <button type="button" class="mode est-actif" role="tab" aria-selected="true" data-mode="solo">
@@ -74,14 +59,13 @@
         </button>
         <button type="button" class="mode" role="tab" aria-selected="false" data-mode="ligne">
           <span class="mode__titre">Contre un ami</span>
-          <span class="mode__texte">En ligne, avec tes cartes</span>
+          <span class="mode__texte">En ligne, avec ton grimoire</span>
         </button>
       </div>
 
       <!-- Duel en ligne : connexion, création / entrée dans un salon, salle d'attente -->
       <section class="ligne" id="panneau-ligne" hidden>
-
-        <div class="ligne__bloc centre" id="ligne-connexion" hidden>
+        <div class="ligne__bloc ligne__bloc--centre" id="ligne-connexion" hidden>
           <p>Le duel en ligne se joue avec les cartes de ton grimoire : connecte-toi avec Discord pour défier un ami.</p>
           <button id="btn-connexion" type="button" class="btn-discord">
             <span class="btn-discord__logo" aria-hidden="true"></span>
@@ -93,7 +77,7 @@
           <div class="ligne__bloc">
             <h3>Ouvrir un salon</h3>
             <p>Crée un salon, puis envoie le lien à ton ami (sur Discord, par exemple).</p>
-            <button type="button" class="btn-duel" id="btn-creer">Créer un salon</button>
+            <button type="button" class="btn-dc btn-dc--ambre" id="btn-creer">Créer un salon</button>
           </div>
           <form class="ligne__bloc" id="form-rejoindre">
             <h3>Rejoindre un salon</h3>
@@ -101,7 +85,7 @@
             <div class="ligne__rejoindre">
               <input type="text" id="code-salon" maxlength="5" autocomplete="off" spellcheck="false"
                 placeholder="CODE" aria-label="Code du salon" required>
-              <button type="submit" class="btn-duel">Rejoindre</button>
+              <button type="submit" class="btn-dc">Rejoindre</button>
             </div>
           </form>
         </div>
@@ -113,68 +97,137 @@
               <strong id="salon-code">—</strong>
             </div>
             <div class="salon__boutons">
-              <button type="button" class="btn-petit-or" id="btn-copier">Copier le lien</button>
-              <button type="button" class="btn-petit-or btn-petit-or--discret" id="btn-quitter">Quitter</button>
+              <button type="button" class="btn-dc" id="btn-copier">Copier le lien</button>
+              <button type="button" class="btn-dc" id="btn-quitter">Quitter</button>
             </div>
           </div>
           <div class="salon__joueurs" id="salon-joueurs"></div>
           <p class="salon__etat" id="salon-etat" aria-live="polite"></p>
+          <button type="button" class="btn-dc btn-dc--ambre salon__pret-btn" id="btn-pret">Je suis prêt</button>
         </div>
       </section>
 
-      <section class="choix" id="section-choix">
-        <div class="choix__tete">
-          <h2 id="choix-titre">Compose ta main</h2>
-          <span class="choix__compte" id="choix-compte">0 / 3</span>
-        </div>
-        <p class="choix__aide" id="choix-aide">Touche trois cartes : la première choisie ouvrira le duel.</p>
-        <div id="choix-cartes" class="choix__cartes"><p class="vide">Les cartes sortent du grimoire…</p></div>
-        <div class="choix__actions">
-          <button type="button" class="btn-duel" id="btn-duel" disabled>Engager le duel</button>
-        </div>
-      </section>
-    </div>
+      <div class="accueil__actions">
+        <button type="button" class="btn-dc btn-dc--ambre" id="btn-jouer" disabled>Engager le duel</button>
+        <button type="button" class="btn-dc" data-ouvrir-regles>Règles du duel</button>
+      </div>
+      <h2 class="accueil__deck-titre" id="accueil-deck-titre">Ton deck</h2>
+      <div class="accueil__deck" id="accueil-deck"><p class="vide">Les cartes sortent du grimoire…</p></div>
+      <!-- Choix des cartes du deck (bouton « Choisir mes cartes ») -->
+      <div class="choix-deck" id="choix-deck" hidden></div>
+    </section>
 
-    <!-- ===== Écran 2 : l'arène ===== -->
-    <!-- Plateau vertical : l'adversaire en haut, toi en bas, la ligne de front au milieu -->
-    <div id="ecran-duel" class="arene" hidden>
-      <div class="arene__camp arene__camp--adverse" id="camp-adverse"></div>
+    <!-- ===== Plateau ===== -->
+    <section class="table" id="ecran-duel" hidden>
+      <div class="table__plateau" id="scene-table">
 
-      <div class="arene__centre">
-        <p class="arene__tour" id="tour"></p>
-        <div class="de" id="de" aria-hidden="true"><span class="de__face" id="de-face">20</span></div>
-        <p class="de__resultat" id="de-resultat"></p>
+        <!-- Haut : la main de l'adversaire en éventail, son héros, son deck et son énergie -->
+        <div class="tg-haut">
+          <div class="main-adverse" id="main-adverse" aria-label="Main de l'adversaire"></div>
+          <div class="tg-heros" id="heros-adverse"></div>
+          <div class="tg-infos" id="infos-adverse"></div>
+        </div>
+
+        <!-- La table de guerre : bois, tapis brodé, bougies ; vue en légère perspective -->
+        <div class="tg-table">
+          <span class="tg-lumiere" aria-hidden="true"></span>
+          <div class="tg-perspective">
+            <div class="tg-bord">
+              <div class="tg-tapis">
+                <div class="terrain" id="terrain-adverse" aria-label="Troupes adverses"></div>
+                <div class="centre">
+                  <div class="d20" id="d20" aria-hidden="true">
+                    <svg viewBox="0 0 100 100"><polygon points="50,4 93,28 93,72 50,96 7,72 7,28"/><path d="M50 4 50 30 93 28M50 30 7 28M50 30 26 70 74 70 50 30M26 70 7 72M26 70 50 96 74 70 93 72M74 70 93 28M26 70 7 28"/></svg>
+                    <span class="d20__face" id="d20-face">20</span>
+                  </div>
+                  <p class="centre__resultat" id="d20-resultat" aria-live="polite"></p>
+                </div>
+                <p class="centre__consigne" id="consigne"></p>
+                <div class="terrain" id="terrain-joueur" aria-label="Tes troupes"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Sur le côté de la table : fin du tour et Jet du Destin -->
+          <div class="tg-cote">
+            <button type="button" class="btn-fin" id="btn-fin">Fin du tour <small>Espace</small></button>
+            <button type="button" class="btn-destin" id="btn-destin">
+              <svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,4 93,28 93,72 50,96 7,72 7,28"/><path d="M50 30 26 70 74 70z"/></svg>
+              <span>Destin <small>2 énergie · D</small></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bas : l'orbe d'énergie, ton héros, ton deck -->
+        <div class="tg-bas">
+          <div class="tg-energie">
+            <div class="orbe" aria-hidden="true"><strong id="orbe-valeur">0</strong><small id="orbe-max">/ 0</small></div>
+            <div class="energie" id="energie" aria-label="Énergie"></div>
+          </div>
+          <div class="tg-heros" id="heros-joueur"></div>
+          <div class="tg-pile"><span class="pile" id="pioche-joueur"></span></div>
+        </div>
+
+        <div class="main" id="main-joueur" aria-label="Ta main"></div>
       </div>
 
-      <div class="arene__camp arene__camp--joueur" id="camp-joueur"></div>
-
-      <div class="actions" id="actions" aria-label="Tes actions"></div>
-
-      <aside class="arene__journal">
-        <h2 class="arene__journal-titre">Chronique du duel</h2>
-        <ol class="journal" id="journal" aria-live="polite" aria-label="Déroulé du duel"></ol>
+      <aside class="historique">
+        <h2 class="historique__titre">Derniers jets</h2>
+        <ol class="historique__liste" id="historique"></ol>
+        <div class="historique__outils">
+          <button type="button" class="btn-outil" data-ouvrir-regles title="Règles du duel" aria-label="Règles du duel">?</button>
+          <button type="button" class="btn-outil" id="btn-son" aria-label="Couper le son" aria-pressed="false">
+            <svg class="ico-son" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="ico-son__ondes" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/><path class="ico-son__barre" d="M16 9l6 6M22 9l-6 6"/></svg>
+          </button>
+          <button type="button" class="btn-outil" id="btn-plein-ecran" title="Plein écran" aria-label="Plein écran">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+          </button>
+          <button type="button" class="btn-outil" id="btn-abandon" title="Abandonner" aria-label="Abandonner le duel">⚑</button>
+        </div>
       </aside>
-    </div>
 
+      <div class="banniere" id="banniere" aria-live="polite"></div>
+      <div class="apercu" id="apercu" aria-hidden="true"></div>
+    </section>
   </main>
+
+  <!-- ===== Règles ===== -->
+  <dialog class="regles" id="regles" aria-labelledby="regles-titre">
+    <h2 id="regles-titre">Règles du Duel des Couronnes</h2>
+    <ul>
+      <li><strong>But</strong> : faire tomber les <span id="regles-pv">20</span> PV du héros adverse avant que les tiens ne tombent.</li>
+      <li><strong>Énergie</strong> : 1 de plus à chaque tour (10 au plus), rechargée au début de ton tour. Chaque carte coûte de l'énergie (le chiffre en haut à gauche).</li>
+      <li><strong>Troupes</strong> : 5 emplacements par camp, 7 cartes en main au plus (une carte piochée main pleine est brûlée). Une unité posée attend le tour suivant pour attaquer.</li>
+      <li><strong>Attaquer</strong> : touche une de tes unités prêtes (bord ambre), puis sa cible. Une unité attaquée riposte avec son attaque.</li>
+      <li><strong>Garde</strong> : doit être attaquée en premier. <strong>Charge</strong> : attaque dès son arrivée.</li>
+      <li><strong>Tes cartes</strong> : coût, attaque et vie viennent de la rareté et du rang. La Veine de la 1re attaque donne la capacité (Forge, Trône, Chaîne, Racine : Garde ; Bête, Sang, Marée : Charge).</li>
+      <li><strong>Chaque attaque est un jet de d20</strong> :
+        <ul class="regles__table" id="regles-jets"></ul>
+      </li>
+      <li><strong>Jet du Destin</strong> : pour 2 énergie, une fois par tour, un second d20 déclenche un événement :
+        <ul class="regles__table" id="regles-destin"></ul>
+      </li>
+      <li><strong>Raccourcis</strong> : Espace pour finir le tour, D pour le Destin, Échap pour annuler une cible.</li>
+    </ul>
+    <button type="button" class="btn-dc btn-dc--ambre" id="regles-fermer">Compris</button>
+  </dialog>
 
   <!-- ===== Fin du duel ===== -->
   <div class="fin" id="fin" hidden role="dialog" aria-modal="true" aria-labelledby="fin-titre">
     <div class="fin__cadre">
       <span class="fin__sur" id="fin-sur"></span>
       <h2 class="fin__titre" id="fin-titre"></h2>
-      <div class="ornement" aria-hidden="true"><span></span><i></i><span></span></div>
       <p class="fin__texte" id="fin-texte"></p>
+      <dl class="fin__stats" id="fin-stats"></dl>
       <div class="fin__actions">
-        <button type="button" class="btn-duel" id="btn-rejouer">Rejouer</button>
-        <button type="button" class="btn-duel btn-duel--second" id="btn-changer">Changer de main</button>
+        <button type="button" class="btn-dc btn-dc--ambre" id="btn-rejouer">Rejouer</button>
+        <a class="btn-dc" href="profil.html" id="lien-profil">Retour au profil</a>
+        <button type="button" class="btn-dc" id="btn-quitter-fin" hidden>Quitter le salon</button>
       </div>
     </div>
   </div>
 
   <div id="notif" class="notif" role="status" aria-live="polite"></div>
 
-  <script src="JS/embers.js"></script>
   <script src="JS/search.js"></script>
   <script src="JS/barre-laterale.js"></script>
   <script type="module" src="JS/auth.js"></script>

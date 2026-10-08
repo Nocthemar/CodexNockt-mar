@@ -1,9 +1,9 @@
 // =====================================================================
-//  Duel des Veines — salon en ligne (Supabase Realtime)
+//  Duel des Couronnes — salon en ligne (Supabase Realtime)
 //  Un salon = un canal « duel-CODE ». Rien n'est écrit dans la base :
-//    - la présence dit qui est là (pseudo, avatar, rôle, prêt, cartes choisies)
-//    - les messages « jeu » portent les événements du duel, envoyés par l'hôte
-//    - les messages « choix » portent les actions de l'invité, reçues par l'hôte
+//    - la présence dit qui est là (pseudo, avatar, rôle, prêt, cartes du deck)
+//    - les messages « jeu » portent les événements du duel et l'état de la partie, envoyés par l'hôte
+//    - les messages « choix » portent les actions de l'invité (jouer, attaquer, Destin, fin du tour), reçues par l'hôte
 //    - les messages « renvoi » redemandent à l'hôte les événements perdus
 //      (connexion coupée un instant, onglet en arrière-plan…)
 //  L'hôte (celui qui crée le salon) fait tourner les règles et lance les dés.

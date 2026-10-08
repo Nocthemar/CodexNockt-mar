@@ -360,7 +360,7 @@ document.addEventListener('click', async (e) => {
       break;
 
     case 'reset':
-      if (!confirm(`Réinitialiser ${j.username} ?\nPièces à 0, inventaire vidé, historique effacé, cosmétiques retirés.\nSes fiches de perso ne sont pas touchées.`)) return;
+      if (!confirm(`Réinitialiser ${j.username} ?\nPièces à 0, inventaire vidé, historique effacé, cosmétiques retirés.`)) return;
       if (prompt(`Pour confirmer, écris : ${j.username}`) !== j.username) return notifier('Réinitialisation annulée', 'erreur');
       if (await rpc('mj_reset_player', { p_discord_id: selection }, `${j.username} a été réinitialisé`)) await rafraichir();
       break;
