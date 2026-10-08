@@ -4,7 +4,7 @@
 //  un exemplaire par joueur, achat via buy_fun_item.
 // =====================================================================
 import { supabase } from './supabase.js';
-import { $, esc, LIBELLES, etat, apercu, pastilles, masquerImagesCassees, boutonAchat } from './boutique-commun.js';
+import { $, etat, htmlArticle, pastilles, masquerImagesCassees, boutonAchat } from './boutique-commun.js';
 
 export async function afficherBoutiqueProfil() {
   const { data: items, error } = await supabase
@@ -27,18 +27,12 @@ export async function afficherBoutiqueProfil() {
 
   zone.innerHTML = items.map((item) => {
     const deja = etat.possedes.has(item.id);
-    return `
-      <article class="article">
-        ${apercu(item)}
-        <span class="article__type">${esc(LIBELLES[item.kind] ?? item.kind)}</span>
-        <h3 class="article__nom">${esc(item.name)}</h3>
-        ${pastilles(item)}
-        ${item.description ? `<p class="article__desc">${esc(item.description)}</p>` : ''}
-        <div class="article__pied">
-          <span class="article__prix">${item.price} <small>pièces</small></span>
-        </div>
-        ${boutonAchat('profil', item.id, item.price, deja ? 'Possédé' : null)}
-      </article>`;
+    return htmlArticle({
+      item,
+      prix: item.price,
+      extra: pastilles(item),
+      bouton: boutonAchat('profil', item.id, item.price, deja ? 'Possédé' : null),
+    });
   }).join('');
 
   masquerImagesCassees(zone);

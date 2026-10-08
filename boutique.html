@@ -38,33 +38,41 @@
     <div id="discord-auth"></div>
   </header>
 
-  <main class="profil-wrap">
+  <main class="profil-wrap marche">
 
     <header class="boutique-entete">
       <h1>Le Marché de Nocthémar</h1>
       <p>Tout ce qui se vend ici est cosmétique ou narratif. Les pièces se gagnent en jouant, jamais en payant.</p>
     </header>
 
-    <!-- Solde (connecté) -->
-    <section id="bourse" class="carte bourse" hidden>
-      <span>Ta bourse</span>
-      <strong><span id="solde">0</span> <img class="piece-icone" src="img/Equipement/Or-icone.webp" alt="pièces"></strong>
-    </section>
-
-    <section class="carte">
-      <div class="boutique-titre">
-        <h2>Boutique du marchand</h2>
-        <span id="rebours" class="rebours"></span>
+    <!-- Échoppe I : sélection du marchand, renouvelée par le bot -->
+    <section class="echoppe">
+      <!-- Solde (connecté), dans le coin de l'échoppe -->
+      <div id="bourse" class="bourse" hidden>
+        <img class="bourse__piece" src="img/Equipement/Or-icone.webp" alt="">
+        <div class="bourse__texte">
+          <span class="bourse__libelle">Ta bourse</span>
+          <strong><span id="solde">0</span> <small>pièces</small></strong>
+        </div>
       </div>
-      <p class="boutique-intro">Le marchand ambulant renouvelle son étal toutes les 5 heures. Stock limité : premier arrivé, premier servi.</p>
+      <div class="enseigne">
+        <span class="enseigne__num">I</span>
+        <span class="enseigne__sur">Boutique du marchand</span>
+        <h2>L'étal du marchand ambulant</h2>
+      </div>
+      <p class="echoppe__intro">Renouvelé toutes les 5 heures. Stock limité : premier arrivé, premier servi.</p>
+      <p id="rebours" class="rebours"></p>
       <div id="jour" class="etal"><p class="vide">Chargement…</p></div>
     </section>
 
-    <section class="carte">
-      <div class="boutique-titre">
-        <h2>Boutique du profil</h2>
+    <!-- Échoppe II : cosmétiques du profil -->
+    <section class="echoppe">
+      <div class="enseigne">
+        <span class="enseigne__num">II</span>
+        <span class="enseigne__sur">Boutique du profil</span>
+        <h2>L'armoire des apparences</h2>
       </div>
-      <p class="boutique-intro">Bannières, titres et thèmes pour personnaliser ton profil. Une fois acheté, équipe-le depuis ton profil.</p>
+      <p class="echoppe__intro">Bannières, titres et thèmes pour ton profil. Une fois acheté, équipe-le depuis ton profil.</p>
       <div id="profil" class="etal"><p class="vide">Chargement…</p></div>
     </section>
 

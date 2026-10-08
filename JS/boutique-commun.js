@@ -3,7 +3,7 @@
 //  (état du joueur connecté, rendu d'une carte d'article, bouton d'achat).
 // =====================================================================
 import { supabase, SITE_ROOT } from './supabase.js';
-import { $, esc, couleur } from './commun.js';
+import { $, esc, couleur, LIBELLES as LIBELLES_ARTICLE } from './commun.js';
 
 export { $, esc, LIBELLES, notifier } from './commun.js';
 
@@ -41,11 +41,12 @@ export function apercu(item) {
   if (item.kind === 'title' && p.text) {
     return `<div class="apercu apercu--titre">« ${esc(p.text)} »</div>`;
   }
-  // Tous les autres objets (potions, jetons…) peuvent avoir une petite icône (ex : emoji Discord)
+  // Tous les autres objets (potions, jetons…) peuvent avoir une image
   if (item.kind !== 'banner' && p.image) {
     return `<img class="article__icone" src="${esc(new URL(p.image, SITE_ROOT))}" alt="">`;
   }
-  return '';
+  // Pas d'image : une petite étoile au centre de la niche
+  return `<span class="article__sans-image" aria-hidden="true">✦</span>`;
 }
 
 // Couleurs d'un thème en petites pastilles rondes (vide pour les autres objets)
@@ -64,10 +65,32 @@ export function masquerImagesCassees(zone) {
     img.addEventListener('error', () => img.parentElement.remove(), { once: true });
   });
   zone.querySelectorAll('.article__icone').forEach((img) => {
-    img.addEventListener('error', () => img.remove(), { once: true });
+    img.addEventListener('error', () => img.outerHTML = '<span class="article__sans-image" aria-hidden="true">✦</span>', { once: true });
   });
 }
 
+
+// Petite pièce d'or à côté des prix
+export const piece = () =>
+  `<img class="piece" src="${esc(new URL('img/Equipement/Or-icone.webp', SITE_ROOT))}" alt="pièces">`;
+
+// Un article de l'étal : l'objet posé dans sa niche sur l'étagère,
+// et son étiquette suspendue en dessous (type, nom, description, prix, achat)
+export function htmlArticle({ item, prix, bouton, stock = '', epuise = false, extra = '' }) {
+  return `
+    <article class="article${epuise ? ' article--epuise' : ''}">
+      <div class="article__niche">${apercu(item)}</div>
+      <div class="article__etiquette">
+        <span class="article__type">${esc(LIBELLES_ARTICLE[item.kind] ?? item.kind)}</span>
+        <h3 class="article__nom">${esc(item.name)}</h3>
+        ${extra}
+        ${item.description ? `<p class="article__desc">${esc(item.description)}</p>` : '<p class="article__desc"></p>'}
+        <div class="article__prix">${prix} ${piece()}</div>
+        ${stock}
+        ${bouton}
+      </div>
+    </article>`;
+}
 
 // Bouton d'achat (même logique pour les deux boutiques)
 export function boutonAchat(boutique, itemId, prix, bloque) {

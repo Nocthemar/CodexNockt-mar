@@ -5,7 +5,7 @@
 //  buy_daily_item. Stock limité, vérifié côté serveur.
 // =====================================================================
 import { supabase } from './supabase.js';
-import { $, esc, LIBELLES, apercu, masquerImagesCassees, boutonAchat } from './boutique-commun.js';
+import { $, htmlArticle, masquerImagesCassees, boutonAchat } from './boutique-commun.js';
 
 export async function afficherBoutiqueDuJour() {
   const zone = $('jour');
@@ -34,18 +34,14 @@ export async function afficherBoutiqueDuJour() {
 
   zone.innerHTML = lignes.map(({ price, stock, item }) => {
     const epuise = stock <= 0;
-    return `
-      <article class="article${epuise ? ' article--epuise' : ''}">
-        ${apercu(item)}
-        <span class="article__type">${esc(LIBELLES[item.kind] ?? item.kind)}</span>
-        <h3 class="article__nom">${esc(item.name)}</h3>
-        ${item.description ? `<p class="article__desc">${esc(item.description)}</p>` : ''}
-        <div class="article__pied">
-          <span class="article__prix">${price} <small>pièces</small></span>
-          <span class="article__stock">${epuise ? 'Épuisé' : `${stock} en stock`}</span>
-        </div>
-        ${boutonAchat('jour', item.id, price, epuise ? 'Épuisé' : null)}
-      </article>`;
+    const bas = !epuise && stock <= 2;   // presque plus rien : stock en rouge
+    return htmlArticle({
+      item,
+      prix: price,
+      epuise,
+      stock: `<span class="article__stock${bas ? ' article__stock--bas' : ''}">${epuise ? 'Épuisé' : `${stock} en stock`}</span>`,
+      bouton: boutonAchat('jour', item.id, price, epuise ? 'Épuisé' : null),
+    });
   }).join('');
 
   masquerImagesCassees(zone);
@@ -78,7 +74,7 @@ export async function demarrerCompteARebours() {
     const hh = Math.floor(reste / 3600);
     const mm = Math.floor((reste % 3600) / 60);
     const ss = reste % 60;
-    el.textContent = `Prochain renouvellement dans ${hh} h ${String(mm).padStart(2, '0')} min ${String(ss).padStart(2, '0')} s`;
+    el.innerHTML = `<span class="rebours__libelle">Nouvel étal dans</span> <strong class="rebours__temps">${hh} h ${String(mm).padStart(2, '0')} min ${String(ss).padStart(2, '0')} s</strong>`;
 
     if (reste === 0) {
       clearInterval(minuteurRebours);
