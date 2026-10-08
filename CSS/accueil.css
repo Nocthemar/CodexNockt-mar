@@ -88,12 +88,6 @@
   border-bottom:none;
   padding:7em 6vw;
 }
-.h-glass{
-  background:linear-gradient(160deg, rgba(40,33,31,0.8), rgba(16,13,13,0.86));
-  border:1px solid var(--glass-line);
-  box-shadow:0 30px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
-}
-
 /* Titre de section façon « Choose / YOUR PREYER » */
 .h-heading{ text-align:center; margin-bottom:3em; }
 .h-heading-small{
@@ -115,19 +109,6 @@
   text-shadow:0 4px 30px rgba(0,0,0,0.6);
 }
 
-.h-divider{
-  display:flex; align-items:center; gap:0.7em;
-  margin:1.4em auto;
-  width:min(16em, 70%);
-}
-.h-divider span{ flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--line-strong)); }
-.h-divider span:last-child{ background:linear-gradient(90deg, var(--line-strong), transparent); }
-.h-divider i{
-  width:7px; height:7px; transform:rotate(45deg);
-  background:var(--blood); box-shadow:0 0 10px var(--blood);
-  flex-shrink:0;
-}
-
 /* ---------- HÉROS ---------- */
 /* Classes .hero-* de CSS/index.css, recentrées au milieu de l'écran.
    Ajustements pour la topbar flottante et l'entrée animée. */
@@ -147,6 +128,7 @@
 }
 .home .hero-v2-title{ font-size:clamp(2.4em, 6vw, 4.8em); }
 .home .hero-divider{ width:14em; }
+.home .hero-divider i{ background:var(--parchment); box-shadow:none; }
 .home .hero-photo .hero-sub{ margin-inline:auto; }
 .home .hero-quote{ border-left:none; padding-left:0; margin-inline:auto; }
 @keyframes heroIn{
@@ -204,7 +186,7 @@
 }
 
 .cf-inner{
-  --tx:0deg; --ty:0deg; --mx:50%; --my:30%;
+  --tx:0deg; --ty:0deg;
   position:absolute; inset:0;
   border-radius:24px;
   overflow:hidden;
@@ -228,12 +210,10 @@
   border:1px solid rgba(255,248,235,0.09);
 }
 .cf-card.is-active .cf-inner::before{ border-color:color-mix(in srgb, var(--c) 30%, rgba(255,248,235,0.1)); }
-/* reflet qui suit la souris */
+/* léger reflet fixe en haut à gauche */
 .cf-inner::after{
   content:""; position:absolute; inset:0; z-index:4; pointer-events:none;
-  background:
-    radial-gradient(circle at var(--mx) var(--my), rgba(255,250,235,0.16), transparent 45%),
-    linear-gradient(125deg, rgba(255,255,255,0.09) 0%, transparent 30%);
+  background:linear-gradient(125deg, rgba(255,255,255,0.09) 0%, transparent 30%);
   opacity:.8;
 }
 
@@ -430,18 +410,6 @@
 }
 .cf-dots button[aria-selected="true"]{ width:22px; background:var(--ac); }
 
-/* ---------- À PROPOS ---------- */
-.h-about-card{
-  max-width:780px; margin:0 auto;
-  padding:3.4em 3em;
-  border-radius:28px;
-  text-align:center;
-}
-.h-about-card h2{ font-size:clamp(1.5em, 3vw, 2.1em); line-height:1.25; }
-.h-about-card p{ margin:0 auto 1em; color:var(--parchment-dim); font-size:1.06em; }
-.h-about-card .h-heading-small{ font-size:1.3em; color:var(--parchment); margin-bottom:0.4em; }
-.h-about-final{ margin-top:1.6em !important; font-style:italic; color:var(--parchment) !important; font-size:1.18em !important; }
-
 /* ---------- DÉ ---------- */
 .home section.dice-panel{ text-align:center; padding-top:5em; padding-bottom:6em; }
 .home .dice-panel .h-heading{ margin-bottom:0.6em; }
@@ -470,7 +438,6 @@
   .cf{ --card-w:min(64vw, 260px); }
   .cf-card.is-active .cf-head h3{ font-size:1.2em; }
   .cf-dock{ gap:0.6em; }
-  .h-about-card{ padding:2.4em 1.4em; border-radius:20px; }
   .h-footer{ margin:0 16px 2em; border-radius:20px; padding:2.4em 1.2em; }
 }
 
@@ -518,32 +485,6 @@
   .js .cf-dock, .js .cf-dots{ transition:opacity .9s ease .75s, translate .9s var(--ease-out) .75s; }
   .js .cf[data-reveal]:not(.is-in) .cf-dock,
   .js .cf[data-reveal]:not(.is-in) .cf-dots{ opacity:0; translate:0 24px; }
-
-  /* --- Bloc « À propos » : le verre se pose, puis le texte s'écrit ligne à ligne --- */
-  .js .h-about-card{
-    transition:opacity 1s ease, transform 1.2s var(--ease-out);
-  }
-  .js .h-about-card[data-reveal]:not(.is-in){ opacity:0; transform:translateY(50px) scale(0.95); }
-  .js .h-about-card > *{ transition:opacity .8s ease, transform .9s var(--ease-out); }
-  .js .h-about-card[data-reveal]:not(.is-in) > *{ opacity:0; transform:translateY(16px); }
-  .js .h-about-card > :nth-child(1){ transition-delay:.35s; }
-  .js .h-about-card > :nth-child(2){ transition-delay:.5s; }
-  .js .h-about-card > :nth-child(3){ transition-delay:.65s; }
-  .js .h-about-card > :nth-child(4){ transition-delay:.8s; }
-  .js .h-about-card > :nth-child(5){ transition-delay:.95s; }
-  .js .h-about-card > :nth-child(6){ transition-delay:1.2s; }
-  /* reflet de lumière qui balaie le verre */
-  .h-about-card{ position:relative; overflow:hidden; }
-  .h-about-card::before{
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background:linear-gradient(105deg, transparent 35%, rgba(255,236,200,0.14) 50%, transparent 65%);
-    transform:translateX(-110%);
-  }
-  .js .h-about-card.is-in::before{ animation:glassSweep 1.8s ease-out .7s; }
-  @keyframes glassSweep{
-    from{ transform:translateX(-110%); }
-    to{ transform:translateX(110%); }
-  }
 
   /* --- Dé : il tombe en tournoyant et rebondit --- */
   .js .dice-panel[data-reveal]:not(.is-in) .d20-die,

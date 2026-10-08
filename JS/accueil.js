@@ -186,8 +186,6 @@
     card.classList.remove('is-tilting');
     inner.style.setProperty('--tx', '0deg');
     inner.style.setProperty('--ty', '0deg');
-    inner.style.setProperty('--mx', '50%');
-    inner.style.setProperty('--my', '30%');
   }
   let tiltFrame = 0, lastMove = null;
   stage.addEventListener('pointermove', (e) => {
@@ -207,8 +205,6 @@
     card.classList.add('is-tilting');
     inner.style.setProperty('--tx', ((0.5 - y) * 12).toFixed(2) + 'deg');
     inner.style.setProperty('--ty', ((x - 0.5) * 16).toFixed(2) + 'deg');
-    inner.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
-    inner.style.setProperty('--my', (y * 100).toFixed(1) + '%');
   }
   stage.addEventListener('pointerleave', () => resetTilt(cards[active]));
 
