@@ -67,7 +67,8 @@ async function init() {
       sessionStorage.setItem(CLE_SALON_EN_ATTENTE, code);
     }
   } else {
-    await changerMode('solo');
+    // ?mode=ligne : ouvre directement « Contre un ami » (lien depuis le profil)
+    await changerMode(new URLSearchParams(location.search).get('mode') === 'ligne' ? 'ligne' : 'solo');
   }
 }
 

@@ -245,6 +245,113 @@ body.glisser-actif, body.glisser-actif * { cursor: grabbing !important; }
 .btn-collection:hover { background: var(--accent); color: var(--fond); }
 
 
+/* ---------- Encart « Duel des Veines » du profil ---------- */
+.carte.duel {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  align-items: center;
+  gap: 24px;
+  padding: 28px;
+  background:
+    radial-gradient(60% 90% at 85% 50%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    linear-gradient(120deg, #1d1717, var(--carte) 55%, #140f0f);
+}
+/* trame de losanges, très discrète */
+.carte.duel::before {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,248,235,.025) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(-45deg, rgba(255,248,235,.025) 0 1px, transparent 1px 22px);
+  mask-image: linear-gradient(90deg, transparent, #000 60%);
+}
+.duel__texte { position: relative; z-index: 1; }
+.duel__sur {
+  font-family: "Cinzel","Cinzel Repli", serif;
+  font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--texte-doux);
+}
+.carte .duel__titre {
+  margin: 6px 0 12px;
+  font-family: "Cinzel Decorative","Cinzel","Cinzel Repli", serif;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: .02em;
+  color: var(--texte);
+  text-shadow: 0 0 22px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.duel__accroche { margin: 0; max-width: 46ch; color: var(--texte-doux); line-height: 1.55; }
+.duel__accroche strong { color: var(--accent); font-weight: 600; }
+
+.duel__regles {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin: 16px 0 22px; padding: 0; list-style: none;
+}
+.duel__regles li {
+  padding: 4px 10px;
+  border: 1px solid var(--bord);
+  font-family: "Cinzel","Cinzel Repli", serif;
+  font-size: .7rem; letter-spacing: .08em;
+  color: var(--texte-doux);
+}
+.duel__regles span { color: var(--accent); margin-right: 4px; }
+
+.duel__boutons { display: flex; flex-wrap: wrap; gap: 12px; }
+.duel__btn {
+  display: flex; flex-direction: column; gap: 2px;
+  min-width: 180px;
+  padding: 10px 16px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  transition: background .15s, color .15s, transform .15s, box-shadow .15s;
+}
+.duel__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.duel__btn--plein { background: var(--accent); color: var(--fond); }
+.duel__btn:not(.duel__btn--plein):hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.duel__btn-titre { font-family: "Cinzel","Cinzel Repli", serif; font-weight: 700; font-size: .9rem; letter-spacing: .06em; }
+.duel__btn-texte { font-size: .85rem; opacity: .8; }
+
+/* Éventail des cartes du deck : s'ouvre au survol */
+.duel__eventail {
+  position: relative; z-index: 1;
+  height: 230px;
+}
+.duel__eventail .carte-jeu {
+  position: absolute;
+  left: 50%; bottom: 0;
+  width: 120px;
+  margin-left: -60px;
+  cursor: pointer;
+  pointer-events: none;
+  transform-origin: 50% 120%;
+  transition: transform .45s cubic-bezier(.25,.8,.3,1);
+}
+.duel__eventail .carte-jeu:nth-child(1) { transform: rotate(-14deg) translateX(-18px); }
+.duel__eventail .carte-jeu:nth-child(2) { transform: translateY(-10px); z-index: 1; }
+.duel__eventail .carte-jeu:nth-child(3) { transform: rotate(14deg) translateX(18px); }
+.duel__eventail:hover .carte-jeu:nth-child(1),
+.duel__eventail:focus-visible .carte-jeu:nth-child(1) { transform: rotate(-22deg) translateX(-34px) translateY(-6px); }
+.duel__eventail:hover .carte-jeu:nth-child(2),
+.duel__eventail:focus-visible .carte-jeu:nth-child(2) { transform: translateY(-22px) scale(1.05); }
+.duel__eventail:hover .carte-jeu:nth-child(3),
+.duel__eventail:focus-visible .carte-jeu:nth-child(3) { transform: rotate(22deg) translateX(34px) translateY(-6px); }
+
+@media (max-width: 760px) {
+  .carte.duel { grid-template-columns: 1fr; padding: 22px 18px; }
+  .duel__eventail { order: -1; height: 190px; }
+  .duel__eventail .carte-jeu { width: 100px; margin-left: -50px; }
+  .duel__btn { flex: 1 1 160px; min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .duel__eventail .carte-jeu, .duel__btn { transition: none; }
+}
+
+
 /* ---------- Notification ---------- */
 .notif {
   position: fixed;

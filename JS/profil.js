@@ -5,7 +5,7 @@
 // =====================================================================
 import { supabase, connexionDiscord, getMonJoueur, SITE_ROOT } from './supabase.js';
 import { $, esc, couleur, LIBELLES, SOURCES } from './commun.js';
-import { chargerDeck, Deck, activerGlisser } from './cartes.js';
+import { chargerDeck, Deck, activerGlisser, htmlCarte } from './cartes.js';
 
 // Le joueur + ses cosmétiques équipés, en une seule requête
 const SELECT_JOUEUR = `
@@ -358,11 +358,24 @@ async function afficherDeck(discordId, estMoi) {
 
   if (!estMoi) return;
   $('lien-collection').hidden = false;
+  afficherDuel(nom, ids.filter((id) => id != null).map((id) => cartes.get(id)));
   activerGlisser($('deck'), {
     poignee: '.deck-emplacement .carte-jeu',
     cible: '.deck-emplacement',
     deposer: (carte, cible) => deck.placer(Number(carte.dataset.carte), Number(cible.dataset.position)),
   });
+}
+
+
+// Encart du Duel des Veines : les 3 premières cartes du deck en éventail
+// (dos de carte pour les places vides)
+function afficherDuel(nomDeck, cartesDeck) {
+  $('duel-deck').textContent = nomDeck;
+  const main = cartesDeck.slice(0, 3);
+  $('duel-eventail').innerHTML = [0, 1, 2]
+    .map((i) => main[i] ? htmlCarte(main[i]) : '<div class="carte-jeu carte-jeu--sans-image"></div>')
+    .join('');
+  $('duel').hidden = false;
 }
 
 

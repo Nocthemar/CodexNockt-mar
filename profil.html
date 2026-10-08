@@ -89,6 +89,31 @@
         <a id="lien-collection" class="btn-collection" href="collection.html" hidden>Ouvrir ma collection</a>
       </section>
 
+      <!-- Duel des Veines : visible uniquement sur son propre profil, avec les cartes du deck en éventail -->
+      <section id="duel" class="carte duel" hidden>
+        <div class="duel__texte">
+          <span class="duel__sur">Jeu de cartes</span>
+          <h2 class="duel__titre">Le Duel des Veines</h2>
+          <p class="duel__accroche">Ton deck <strong id="duel-deck">Deck de cartes</strong> attend son premier adversaire. Trois cartes, un d20, et que le destin tranche.</p>
+          <ul class="duel__regles">
+            <li><span aria-hidden="true">◆</span> Essence</li>
+            <li><span aria-hidden="true">⬡</span> Jets au d20</li>
+            <li><span aria-hidden="true">✦</span> Roue des Veines</li>
+          </ul>
+          <div class="duel__boutons">
+            <a class="duel__btn duel__btn--plein" href="jeu-cartes.html">
+              <span class="duel__btn-titre">Contre l'Ombre</span>
+              <span class="duel__btn-texte">Seul, contre l'IA</span>
+            </a>
+            <a class="duel__btn" href="jeu-cartes.html?mode=ligne">
+              <span class="duel__btn-titre">Contre un ami</span>
+              <span class="duel__btn-texte">En ligne, avec ton grimoire</span>
+            </a>
+          </div>
+        </div>
+        <a class="duel__eventail" href="jeu-cartes.html" aria-label="Jouer au Duel des Veines" id="duel-eventail"></a>
+      </section>
+
       <!-- Visible uniquement sur son propre profil : détails du compte, en dernier -->
       <div id="prive" hidden>
 

@@ -147,10 +147,6 @@
   body.has-rail{ padding-bottom:76px; }
 }
 
-/* Très petits écrans : un peu plus serré (6 liens + le compte Discord) */
-@media (max-width:400px){
-  .rail{ padding:6px 5px; }
-  .rail-item, .rail .nav-search.rail-item, .rail .btn-discord{ width:36px; }
-  .rail #discord-auth{ gap:6px; }
-  .rail-sep{ margin:0; }
-}
+
+/* Boutique, placée sous la photo du compte (JS/barre-laterale.js) */
+.rail-compte-liens{ display:contents; }
