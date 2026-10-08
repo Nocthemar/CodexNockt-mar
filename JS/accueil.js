@@ -8,6 +8,7 @@
   const stage = root.querySelector('.cf-stage');
   const cards = Array.from(root.querySelectorAll('.cf-card'));
   const dotsWrap = root.querySelector('.cf-dots');
+  const dock = root.querySelector('.cf-dock');
   const dockMain = root.querySelector('.cf-dock-main');
   const dockThumb = root.querySelector('.cf-dock-thumb');
   const dockName = root.querySelector('.cf-dock-name');
@@ -77,7 +78,7 @@
       card.style.setProperty('--x', side * L.x[k]);
       card.style.setProperty('--z', L.z[k] + 'px');
       card.style.setProperty('--ry', (side * -TILT) + 'deg');
-      card.style.setProperty('--lum', L.lum[k]);
+      card.querySelector('.cf-dim').style.opacity = ((1 - L.lum[k]) * 1.3).toFixed(3);
       card.style.setProperty('--abs', abs);
       card.style.zIndex = 100 - abs;
       card.classList.toggle('is-active', d === 0);
@@ -89,7 +90,10 @@
     dots.forEach((b, i) => b.setAttribute('aria-selected', i === active ? 'true' : 'false'));
 
     const cur = cards[active];
-    root.style.setProperty('--ac', cur.style.getPropertyValue('--c'));
+    // couleur de la carte active : posée seulement là où elle sert (pas sur tout le carrousel)
+    const ac = cur.style.getPropertyValue('--c');
+    dock.style.setProperty('--ac', ac);
+    dotsWrap.style.setProperty('--ac', ac);
     dockMain.href = cur.getAttribute('href');
     dockThumb.innerHTML = cur.querySelector('.cf-icon').innerHTML;
     dockName.textContent = cur.querySelector('h3').textContent;
