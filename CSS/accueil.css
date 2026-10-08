@@ -139,8 +139,9 @@
 .home section.h-codex{ padding-left:0; padding-right:0; overflow:hidden; }
 .h-codex .h-heading{ margin-bottom:1.2em; }
 .cf{
-  --card-w:clamp(250px, 19vw, 350px);
-  --card-h:min(calc(var(--card-w) * 1.48), 66vh);
+  /* format 2:3 des illustrations (1024x1536) : l'image tient en entier sans être rognée */
+  --card-w:min(clamp(250px, 19vw, 350px), 44vh);
+  --card-h:calc(var(--card-w) * 1.5);
   --ac:#c9a66b; /* couleur de la carte active (mise à jour par JS) */
   position:relative;
 }
@@ -275,6 +276,20 @@
 .cf-card:not(.is-active) .cf-icon svg{ filter:none; opacity:.75; }
 .cf-card.is-active:hover .cf-icon{ transform:translate(-50%, -50%) scale(1.08); }
 .cf-card.is-soon .cf-art{ filter:saturate(0.45); }
+/* illustration de la catégorie : affichée en entier, sans recadrage */
+.cf-img{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:contain;
+  pointer-events:none; -webkit-user-drag:none;
+}
+.cf-card.has-img .cf-art::after{
+  background:linear-gradient(180deg, transparent 55%, rgba(13,11,11,0.7) 100%);
+}
+.cf-card.has-img .cf-icon{ display:none; }
+/* pas de couleur de catégorie autour des illustrations (bordure, halo, cadre) */
+.cf-card.has-img .cf-inner{ background:#0d0b0b; border-color:var(--glass-line); }
+.cf-card.has-img.is-active .cf-inner{ box-shadow:0 40px 90px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.14); }
+.cf-card.has-img .cf-inner::before{ display:none; }
 
 .cf-chip{
   position:absolute; top:22px; left:50%; z-index:6;
@@ -384,6 +399,7 @@
 }
 .cf-dock-thumb{ display:flex; align-items:center; justify-content:center; color:color-mix(in srgb, var(--ac) 70%, #fff); }
 .cf-dock-thumb svg{ width:24px; height:24px; }
+.cf-dock-thumb img{ width:100%; height:100%; object-fit:cover; object-position:50% 30%; }
 .cf-dock-text{ display:flex; flex-direction:column; line-height:1.25; min-width:0; }
 .cf-dock-name{ font-family:"Cinzel","Cinzel Repli", serif; font-weight:600; font-size:1em; white-space:nowrap; }
 .cf-dock-sub{ font-size:0.82em; color:var(--parchment-dim); white-space:nowrap; }
@@ -437,7 +453,7 @@
   .home section.h-section{ padding:4.5em 16px; }
   .h-heading{ margin-bottom:2em; }
   .h-heading-small{ font-size:1.3em; }
-  .cf{ --card-w:min(64vw, 260px); }
+  .cf{ --card-w:min(64vw, 260px, 44vh); }
   .cf-card.is-active .cf-head h3{ font-size:1.2em; }
   .cf-dock{ gap:0.6em; }
   .h-footer{ margin:0 16px 2em; border-radius:20px; padding:2.4em 1.2em; }

@@ -40,8 +40,9 @@
     card.querySelector('.cf-head').after(sub);
     card.setAttribute('draggable', 'false');
 
-    // Paysage de montagnes dessiné, teinté par la couleur de la catégorie
-    card.querySelector('.cf-art').insertAdjacentHTML('afterbegin', mountains(i));
+    // Illustration de la catégorie si elle existe, sinon paysage de montagnes dessiné
+    if(card.querySelector('.cf-img')) card.classList.add('has-img');
+    else card.querySelector('.cf-art').insertAdjacentHTML('afterbegin', mountains(i));
 
     // .cf-inner porte le visuel : la coque garde la position 3D,
     // l'intérieur peut osciller et suivre la souris sans conflit
@@ -95,7 +96,8 @@
     dock.style.setProperty('--ac', ac);
     dotsWrap.style.setProperty('--ac', ac);
     dockMain.href = cur.getAttribute('href');
-    dockThumb.innerHTML = cur.querySelector('.cf-icon').innerHTML;
+    const img = cur.querySelector('.cf-img');
+    dockThumb.innerHTML = img ? '<img src="' + img.getAttribute('src') + '" alt="">' : cur.querySelector('.cf-icon').innerHTML;
     dockName.textContent = cur.querySelector('h3').textContent;
     dockSub.textContent = 'Section ' + (active + 1) + ' sur ' + n;
   }
