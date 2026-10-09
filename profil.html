@@ -15,6 +15,9 @@
   <link rel="stylesheet" href="CSS/cartes-jeu.css">
   <link rel="stylesheet" href="CSS/carte-infos.css">
   <link rel="stylesheet" href="CSS/profil.css">
+<!-- Thème clair / sombre (bouton dans la barre latérale) : appliqué avant l'affichage -->
+<script>try{if(localStorage.getItem('nocthemar-theme')==='jour')document.documentElement.dataset.theme='jour'}catch(e){}</script>
+<link rel="stylesheet" href="CSS/theme-jour.css">
 </head>
 <body class="page-profil page-fiche">
 
@@ -69,29 +72,25 @@
         </div>
       </section>
 
-      <!-- Duel : visible uniquement sur son propre profil, avec les cartes du deck en éventail -->
+      <!-- Duel des Couronnes : le deck de duel en éventail sur le tapis. Visible uniquement sur son propre profil -->
       <section id="duel" class="carte duel" hidden>
         <div class="duel__texte">
-          <span class="duel__sur">Jeu de cartes</span>
+          <span class="duel__sur">Jeu de cartes de Nocthémar</span>
           <h2 class="duel__titre">Duel des Couronnes</h2>
-          <p class="duel__accroche">Ton deck <strong id="duel-deck">Deck de cartes</strong> mène tes troupes face à l'Ombre du Codex. Pose tes unités, sers-toi de tes objets de pouvoir, et que chaque coup se joue au d20.</p>
-          <ul class="duel__regles">
-            <li><span aria-hidden="true">◆</span> Énergie</li>
-            <li><span aria-hidden="true">⬡</span> Jets au d20</li>
-            <li><span aria-hidden="true">✦</span> Jet du Destin</li>
-          </ul>
+          <p class="duel__accroche" id="duel-accroche"></p>
+          <dl class="duel__stats" id="duel-stats"></dl>
           <div class="duel__boutons">
             <a class="duel__btn duel__btn--plein" href="jeu-cartes.html">
-              <span class="duel__btn-titre">Engager le duel</span>
-              <span class="duel__btn-texte">Seul, contre l'Ombre du Codex</span>
+              <span class="duel__btn-titre">Aller au plateau</span>
             </a>
           </div>
         </div>
         <a class="duel__eventail" href="jeu-cartes.html" aria-label="Jouer au Duel des Couronnes" id="duel-eventail"></a>
       </section>
 
-      <!-- Deck de cartes : visible par tous, modifiable seulement sur son propre profil -->
-      <section class="carte deck">
+      <!-- Vitrine des cartes favorites (le deck du profil) : visible par tous, modifiable seulement sur son propre profil -->
+      <section class="carte deck vitrine">
+        <span class="vitrine__sur">Cartes favorites</span>
         <div id="deck"></div>
         <a id="lien-collection" class="btn-collection" href="collection.html" hidden>Ouvrir ma collection</a>
       </section>
@@ -99,7 +98,6 @@
       <!-- Le duelliste : cartes et objets de pouvoir possédés, bourse. Visible uniquement sur son propre profil -->
       <section id="duelliste" class="carte duelliste" hidden>
         <h2>Le duelliste</h2>
-        <dl id="duelliste-stats" class="duelliste__stats"></dl>
 
         <div class="perso__bas">
           <!-- Les 7 objets de pouvoir du Duel : ceux qu'on possède en couleur, les autres grisés -->

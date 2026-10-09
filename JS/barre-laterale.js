@@ -27,14 +27,18 @@
   const ICONES = {
     accueil: '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
     codex:   '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>',
+    cartes:  '<rect x="3" y="6" width="11" height="15" rx="1.5" transform="rotate(-8 8.5 13.5)"/><rect x="10" y="3" width="11" height="15" rx="1.5" transform="rotate(8 15.5 10.5)"/>',
     boutique:'<path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
     retour:  '<path d="M15 5l-7 7 7 7"/>',
+    soleil:  '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    lune:    '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
   };
   const icone = (nom) => `<span class="rail-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[nom]}</svg></span>`;
 
   const page = location.pathname.replace(/\/$/, '/index.html');
   const surAccueil = new URL('index.html', racine).pathname === page;
   const surBoutique = new URL('boutique.html', racine).pathname === page;
+  const surJeu = ['jeu-cartes.html', 'histoire.html'].some((p) => new URL(p, racine).pathname === page);
 
   function item(nom, libelle, href, actif){
     const a = document.createElement('a');
@@ -80,6 +84,29 @@
     retour.remove();
   }
 
+  // Thème clair / sombre : <html data-theme="jour"> (CSS/theme-jour.css), retenu dans le navigateur
+  const CLE_THEME = 'nocthemar-theme';
+  const theme = document.createElement('button');
+  theme.type = 'button';
+  theme.className = 'rail-item rail-theme';
+  const majTheme = () => {
+    const jour = document.documentElement.dataset.theme === 'jour';
+    const libelle = jour ? 'Thème sombre' : 'Thème clair';
+    theme.innerHTML = icone(jour ? 'lune' : 'soleil') + '<span class="rail-label"></span>';
+    theme.querySelector('.rail-label').textContent = libelle;
+    theme.setAttribute('aria-label', libelle);
+    theme.setAttribute('aria-pressed', String(jour));
+  };
+  theme.addEventListener('click', () => {
+    const jour = document.documentElement.dataset.theme !== 'jour';
+    if(jour) document.documentElement.dataset.theme = 'jour';
+    else delete document.documentElement.dataset.theme;
+    try { localStorage.setItem(CLE_THEME, jour ? 'jour' : 'nuit'); } catch(e) { /* stockage indisponible */ }
+    majTheme();
+  });
+  majTheme();
+  rail.appendChild(theme);
+
   const sep = document.createElement('span');
   sep.className = 'rail-sep';
   rail.appendChild(sep);
@@ -88,11 +115,12 @@
   const compte = document.getElementById('discord-auth');
   if(compte) rail.appendChild(compte);
 
-  // Boutique : juste sous la photo du compte Discord.
+  // Jeu de cartes puis Boutique : juste sous la photo du compte Discord.
   // JS/auth.js réécrit la zone à chaque (dé)connexion : on la replace à chaque fois.
   const liens = document.createElement('div');
   liens.className = 'rail-compte-liens';
   liens.append(
+    item('cartes', 'Jeu de cartes', lien('jeu-cartes.html'), surJeu),
     item('boutique', 'Boutique', lien('boutique.html'), surBoutique),
   );
   if(compte){

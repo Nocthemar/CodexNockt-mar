@@ -12,6 +12,9 @@
 <link rel="stylesheet" href="../CSS/Fiche_personnage.css">
 <link rel="stylesheet" href="../CSS/search.css">
 <link rel="stylesheet" href="../CSS/compte.css">
+<!-- Thème clair / sombre (bouton dans la barre latérale) : appliqué avant l'affichage -->
+<script>try{if(localStorage.getItem('nocthemar-theme')==='jour')document.documentElement.dataset.theme='jour'}catch(e){}</script>
+<link rel="stylesheet" href="../CSS/theme-jour.css">
 </head>
 <body>
 <canvas id="embers"></canvas>
@@ -71,7 +74,7 @@
 
         <div class="profile-badges">
           <span class="pbadge veine">🌿 Veine des Marais</span>
-          <a class="pbadge divinite" href="../categories/Religion.html">🕯️ Divinité — catégorie Religion</a>
+          <span class="pbadge divinite">🕯️ Divinité</span>
         </div>
 
         <p style="margin-top:1.8em;">On sait peu de choses du Seigneur des Marais. Son nom véritable, son origine et l'histoire qui l'a mené à sa condition de divinité restent un mystère complet, y compris pour les érudits les plus assidus de Nocthémar.</p>

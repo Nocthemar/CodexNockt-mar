@@ -5,17 +5,29 @@
 //  - 5 emplacements de troupes par camp, 7 cartes en main au plus
 //  - Capacités : Garde (doit être attaquée en premier), Charge (attaque dès son arrivée)
 //  - Chaque attaque est un jet de d20 (table JETS), le Jet du Destin un second d20 (table DESTIN)
-//  Le duel se joue entièrement dans le navigateur, contre l'IA : il ne donne
-//  ni pièces ni cartes, donc rien à vérifier côté serveur.
+//  - Le Grimoire : 20 cartes (2 exemplaires au plus d'une carte, 4 objets au plus),
+//    complété par des cartes de base, mélangé au début de la partie
+//  - Début : 3 cartes pour celui qui commence, 4 pour l'autre, puis un renvoi de main (une fois)
+//  - 1 carte piochée par tour ; main pleine (7) : la carte piochée est brûlée (Tombeau)
+//  - Le Tombeau : troupes mortes, sorts joués, cartes brûlées et défaussées (visible des deux joueurs)
+//  - Une fois par tour chacun, pour 1 énergie : Défausser (une carte au Tombeau, on en pioche une)
+//    et Méditer (regarder les 3 premières cartes du Grimoire, en placer une dessous)
+//  - Épuisement : piocher dans un Grimoire vide coûte 1 PV, puis 2, puis 3…
+//  Le duel se joue entièrement dans le navigateur. Seul le mode Histoire donne des
+//  récompenses, et c'est le serveur qui les vérifie (valider_niveau_histoire, SQL/mode_histoire.sql).
 // =====================================================================
 
 export const PV_HEROS = 20;
 export const ENERGIE_MAX = 10;
 export const PLACES = 5;
-export const MAIN_MAX = 7;
-export const MAIN_DEPART = 3;
+export const MAIN_MAX = 7;          // une carte piochée main pleine est brûlée
+export const MAIN_DEPART = 3;       // le second joueur pioche une carte de plus
 export const COUT_DESTIN = 2;
-export const TAILLE_DECK = 5;        // 5 cartes par joueur, pas une de plus (comme le deck du profil)
+export const COUT_DEFAUSSE = 1;     // défausser une carte de sa main (une fois par tour)
+export const COUT_MEDITER = 1;      // regarder les 3 premières cartes du Grimoire (une fois par tour)
+export const TAILLE_DECK = 20;      // le Grimoire
+export const COPIES_MAX = 2;        // exemplaires au plus d'une même carte
+export const OBJETS_MAX = 4;        // objets de pouvoir au plus dans le Grimoire
 export const UNITES_PAR_DECK = TAILLE_DECK;
 
 // ---------------------------------------------------------------------
@@ -82,12 +94,11 @@ export const TROUPES = [
 export const MILICIEN = { id: 'milicien', n: 'Milicien de la Couronne', c: 1, t: 'u', a: 2, h: 2, k: null, veine: null, icone: 'epee' };
 
 // ---------------------------------------------------------------------
-//  Le deck : les vraies cartes du joueur, en plusieurs exemplaires
-//  (assez pour une vingtaine de cartes), et au plus 4 cartes du Codex
-//  bon marché pour jouer dès les premiers tours. Plus le joueur a de cartes,
-//  moins il y a d'ajouts : aucun à partir de 12 cartes.
+//  Cartes de base : elles complètent un Grimoire trop petit (troupes puis sorts du Codex,
+//  des moins chères aux plus chères)
 // ---------------------------------------------------------------------
-export const AJOUTS_CODEX = [TROUPES[0], TROUPES[1], SORTS[0], SORTS[1]];   // Écuyer, Garde du Pont, Étincelle, Morsure
+export const CARTES_BASE = [...TROUPES, ...SORTS].sort((a, b) => a.c - b.c);
+export const AJOUTS_CODEX = CARTES_BASE;   // (ancien nom)
 
 // ---------------------------------------------------------------------
 //  Cartes de pouvoir : les objets de l'Équipement (img/Equipement), effets tirés
@@ -105,26 +116,44 @@ export const OBJETS = [
   { id: 'o-coffre',   n: "Nécessaire d'aventurier", c: 1, t: 's', fx: 'coffre',   v: 1, image: 'img/Equipement/Nécessaire d’aventurier.webp', d: 'Ouvre un coffre : pioche 1 carte et regagne 1 énergie.' },
   { id: 'o-jeton',    n: 'Jeton du marchand',       c: 0, t: 's', fx: 'jeton',    v: 2, image: 'img/Equipement/Jeton du marchand.webp',       d: 'Ta prochaine carte coûte 2 de moins.' },
 ];
-export const OBJETS_PAR_DECK = 2;   // objets au plus parmi les 5 cartes (s'il y a assez de personnages)
+export const OBJETS_PAR_DECK = OBJETS_MAX;   // (ancien nom)
 
 // Retrouve un objet à partir d'un nom d'inventaire (« Tonique d’endurance », « potion de soin »…)
 const cleObjet = (nom) => String(nom).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, "'").trim().toLowerCase();
 export const objetDepuisNom = (nom) => OBJETS.find((o) => cleObjet(o.n) === cleObjet(nom)) ?? null;
 
-// Deck de TAILLE_DECK cartes au plus, chacune en un seul exemplaire :
-// OBJETS_PAR_DECK objets au plus, le reste en personnages (plus d'objets s'il manque des personnages).
-// Aucune carte du tout : 5 Troupes du Codex pour pouvoir jouer quand même.
-export function compositionDeck(unites, objets = []) {
-  const objs = [...new Map(objets.filter(Boolean).map((o) => [o.id, o])).values()];
-  if (!unites.length && !objs.length) return { cartes: TROUPES.slice(0, TAILLE_DECK), unites: TROUPES.slice(0, TAILLE_DECK), objets: [] };
-  const nbObjets = Math.min(objs.length, Math.max(OBJETS_PAR_DECK, TAILLE_DECK - unites.length));
-  const o = objs.slice(0, nbObjets);
-  const u = unites.slice(0, TAILLE_DECK - o.length);
-  return { cartes: [...u, ...o], unites: u, objets: o };
+// Le Grimoire d'un joueur : les cartes choisies (dans l'ordre, avec répétitions pour les
+// exemplaires), en respectant COPIES_MAX par carte, OBJETS_MAX objets et TAILLE_DECK cartes,
+// puis complété avec les cartes de base jusqu'à TAILLE_DECK. Renvoie la liste (non mélangée).
+export const estObjet = (c) => !!c && OBJETS.some((o) => o.id === c.id);
+export function grimoire(cartes = []) {
+  const liste = [];
+  const nb = new Map();
+  const ajouter = (c) => {
+    if (!c || liste.length >= TAILLE_DECK) return false;
+    if ((nb.get(c.id) ?? 0) >= COPIES_MAX) return false;
+    if (estObjet(c) && liste.filter(estObjet).length >= OBJETS_MAX) return false;
+    nb.set(c.id, (nb.get(c.id) ?? 0) + 1);
+    liste.push(c);
+    return true;
+  };
+  cartes.forEach(ajouter);
+  // Complément : un exemplaire de chaque carte de base, puis un second, jusqu'à 20
+  for (let tour = 0; tour < COPIES_MAX && liste.length < TAILLE_DECK; tour++) {
+    for (const c of CARTES_BASE) ajouter(c);
+  }
+  return liste;
 }
 
-export function construireDeck(unites, objets = []) {
-  return melanger(compositionDeck(unites, objets).cartes);
+// Un Grimoire mélangé, prêt pour une partie
+export function construireDeck(cartes = []) {
+  return melanger(grimoire(cartes));
+}
+
+// (ancienne interface : les unités et les objets d'un deck)
+export function compositionDeck(unites = [], objets = []) {
+  const cartes = grimoire([...unites, ...objets]);
+  return { cartes, unites: cartes.filter((c) => c.t === 'u'), objets: cartes.filter((c) => c.t !== 'u') };
 }
 
 // Coût réel d'une carte (le Jeton du marchand réduit la suivante)
@@ -180,49 +209,96 @@ function creerCamp(nom, deck) {
   return {
     nom, pv: PV_HEROS, pvMax: PV_HEROS,
     energie: 0, energieMax: 0, destinUtilise: false,
-    deck, main: [], terrain: Array(PLACES).fill(null),
+    deck, main: [], tombeau: [], terrain: Array(PLACES).fill(null),
+    epuisement: 0, defausseUtilisee: false, mediterUtilise: false, meditation: null,
     stats: { jets: 0, critiques: 0, echecs: 0, cartes: 0, degats: 0, destins: 0 },
   };
 }
 
 export const autre = (qui) => (qui === 'joueur' ? 'adverse' : 'joueur');
 
-export function creerPartie(deckJoueur, deckAdverse, nomJoueur, nomAdverse, premier) {
+// deckJoueur / deckAdverse : les Grimoires (construireDeck), mélangés ici de nouveau.
+// options (mode Histoire, toutes facultatives) :
+//   pvAdverse          PV du héros adverse (20 par défaut)
+//   energieBonusAdverse énergie en plus à chaque tour de l'adversaire (boss)
+// La partie commence par le renvoi de main : p.renvoi[qui] passe à true quand le joueur a choisi
+// (renvoyerMain), et le premier tour ne commence qu'une fois les deux renvois faits (renvoiFini).
+export function creerPartie(deckJoueur, deckAdverse, nomJoueur, nomAdverse, premier, options = {}) {
   const p = {
-    camps: { joueur: creerCamp(nomJoueur, deckJoueur), adverse: creerCamp(nomAdverse, deckAdverse) },
+    camps: { joueur: creerCamp(nomJoueur, melanger(deckJoueur)), adverse: creerCamp(nomAdverse, melanger(deckAdverse)) },
     actif: premier, tour: 0, fini: null,
+    renvoi: { joueur: false, adverse: false },
     jets: [],   // historique des derniers jets (affichage)
   };
+  if (options.pvAdverse > 0) p.camps.adverse.pv = p.camps.adverse.pvMax = options.pvAdverse;
+  if (options.energieBonusAdverse > 0) p.camps.adverse.energieBonus = options.energieBonusAdverse;
   piocher(p.camps[premier], MAIN_DEPART);
   piocher(p.camps[autre(premier)], MAIN_DEPART + 1);   // le second joueur a une carte de plus
   return p;
 }
 
-// Pioche : une main pleine brûle la carte piochée
+export const renvoiFini = (p) => !!p.renvoi && p.renvoi.joueur && p.renvoi.adverse;
+
+// Renvoi de main (une seule fois, avant le premier tour) : les cartes choisies (index dans la
+// main) retournent dans le Grimoire, qui est remélangé, puis le joueur repioche autant de cartes
+export function renvoyerMain(p, qui, indices = []) {
+  if (!p.renvoi || p.renvoi[qui] || p.fini) return null;
+  const camp = p.camps[qui];
+  const choisis = [...new Set(indices)].filter((i) => Number.isInteger(i) && i >= 0 && i < camp.main.length);
+  const renvoyees = choisis.sort((a, b) => b - a).map((i) => camp.main.splice(i, 1)[0]);
+  camp.deck = melanger([...camp.deck, ...renvoyees]);
+  const pioche = piocher(camp, renvoyees.length);
+  p.renvoi[qui] = true;
+  return { type: 'renvoi', qui, n: renvoyees.length, pioche };
+}
+
+// Pioche n cartes sur le dessus du Grimoire.
+// - main pleine (MAIN_MAX) : la carte est brûlée et va au Tombeau
+// - Grimoire vide : épuisement, le héros perd 1 PV, puis 2, puis 3… à chaque carte manquante
+// Renvoie { piochees, brulees, epuisement } (epuisement : PV perdus). Après une pioche, l'appelant
+// vérifie la fin de partie (nettoyer), car l'épuisement peut faire tomber un héros.
 export function piocher(camp, n = 1) {
-  const res = { piochees: [], brulees: [] };
-  for (let i = 0; i < n && camp.deck.length; i++) {
+  const res = { piochees: [], brulees: [], epuisement: 0 };
+  for (let i = 0; i < n; i++) {
+    if (!camp.deck.length) {
+      camp.epuisement += 1;
+      camp.pv -= camp.epuisement;
+      res.epuisement += camp.epuisement;
+      continue;
+    }
     const carte = camp.deck.shift();
-    if (camp.main.length >= MAIN_MAX) res.brulees.push(carte);
+    if (camp.main.length >= MAIN_MAX) { res.brulees.push(carte); camp.tombeau.push(carte); }
     else { camp.main.push(carte); res.piochees.push(carte); }
   }
   return res;
+}
+
+// Ramène une carte du Tombeau (pour les futures cartes de la Veine du Tombeau).
+// vers : 'main' (si elle n'est pas pleine) ou 'grimoire' (sur le dessus). Renvoie la carte, ou null.
+export function ramenerDuTombeau(p, qui, index, vers = 'main') {
+  const camp = p.camps[qui];
+  const carte = camp.tombeau[index];
+  if (!carte) return null;
+  if (vers === 'main' && camp.main.length >= MAIN_MAX) return null;
+  camp.tombeau.splice(index, 1);
+  if (vers === 'main') camp.main.push(carte);
+  else camp.deck.unshift(carte);
+  return carte;
 }
 
 export function debutTour(p) {
   const camp = p.camps[p.actif];
   if (p.actif === 'joueur' || p.tour === 0) p.tour += 1;
   camp.energieMax = Math.min(ENERGIE_MAX, camp.energieMax + 1);
-  camp.energie = camp.energieMax;
+  camp.energie = Math.min(ENERGIE_MAX, camp.energieMax + (camp.energieBonus ?? 0));
   camp.destinUtilise = false;
+  camp.defausseUtilisee = false;
+  camp.mediterUtilise = false;
   camp.terrain.forEach((u) => { if (u) { u.prete = true; u.aAttaque = false; } });
   const ev = { type: 'tour', qui: p.actif, pioche: piocher(camp, 1) };
-  // Fatigue : pioche vide, le héros perd 1 PV, puis 2, puis 3… à chaque début de tour
-  // (sinon, une fois toutes les cartes jouées, la partie pourrait ne jamais finir)
-  if (!camp.deck.length && !ev.pioche.piochees.length && !ev.pioche.brulees.length) {
-    camp.fatigue = (camp.fatigue ?? 0) + 1;
-    camp.pv -= camp.fatigue;
-    ev.fatigue = camp.fatigue;
+  // Épuisement : Grimoire vide, le héros perd des PV (ev.fatigue = PV perdus)
+  if (ev.pioche.epuisement) {
+    ev.fatigue = ev.pioche.epuisement;
     nettoyer(p);
   }
   return ev;
@@ -240,7 +316,7 @@ const placeLibre = (camp) => camp.terrain.findIndex((u) => !u);
 export function peutJouer(p, qui, index) {
   const camp = p.camps[qui];
   const carte = camp.main[index];
-  if (!carte || p.fini || p.actif !== qui || coutDe(camp, carte) > camp.energie) return false;
+  if (!carte || p.fini || p.actif !== qui || camp.meditation || coutDe(camp, carte) > camp.energie) return false;
   if (carte.t === 'u') return placeLibre(camp) >= 0;
   if (carte.fx === 'unit') return unites(p.camps[autre(qui)]).length > 0;
   if (carte.fx === 'buff' || carte.fx === 'rage') return unites(camp).length > 0;
@@ -269,13 +345,18 @@ export function ciblesAttaque(p, qui) {
 export const peutAttaquer = (u) => !!u && u.prete && !u.aAttaque && u.a > 0;
 const memeCible = (a, b) => a.camp === b.camp && (a.heros ? b.heros : a.uid === b.uid);
 
-// Retire les unités tombées et vérifie la fin de partie
+// Retire les unités détruites (elles vont au Tombeau, sauf le Milicien du Destin qui n'est pas
+// une carte) et regarde si un héros est tombé
 function nettoyer(p) {
   const morts = [];
   for (const qui of ['joueur', 'adverse']) {
     const camp = p.camps[qui];
     camp.terrain = camp.terrain.map((u) => {
-      if (u && u.h <= 0) { morts.push(u.uid); return null; }
+      if (u && u.h <= 0) {
+        morts.push(u.uid);
+        if (u.def && u.def.id !== MILICIEN.id) camp.tombeau.push(u.def);
+        return null;
+      }
       return u;
     });
   }
@@ -307,8 +388,65 @@ export function jouer(p, qui, index, cible = null) {
     return ev;
   }
   cast(p, qui, carte, cible, ev);
+  camp.tombeau.push(carte);   // un sort joué va au Tombeau
   ev.morts = nettoyer(p);
   return ev;
+}
+
+// ---------------------------------------------------------------------
+//  Défausser (1 énergie, une fois par tour) : une carte de la main au Tombeau, on en pioche une
+// ---------------------------------------------------------------------
+export const peutDefausser = (p, qui) => {
+  const camp = p.camps[qui];
+  return p.actif === qui && !p.fini && !camp.meditation && !camp.defausseUtilisee
+    && camp.energie >= COUT_DEFAUSSE && camp.main.length > 0;
+};
+
+export function defausser(p, qui, index) {
+  if (!peutDefausser(p, qui)) return null;
+  const camp = p.camps[qui];
+  const carte = camp.main[index];
+  if (!carte) return null;
+  camp.main.splice(index, 1);
+  camp.energie -= COUT_DEFAUSSE;
+  camp.defausseUtilisee = true;
+  camp.tombeau.push(carte);
+  const ev = { type: 'defausse', qui, carte, pioche: piocher(camp, 1) };
+  ev.morts = nettoyer(p);
+  return ev;
+}
+
+// ---------------------------------------------------------------------
+//  Méditer (1 énergie, une fois par tour) : le joueur regarde les 3 premières cartes de son
+//  Grimoire (camp.meditation), puis en place une dessous ou n'en place aucune (placerSous).
+//  Tant que le choix n'est pas fait, aucune autre action n'est possible.
+// ---------------------------------------------------------------------
+export const peutMediter = (p, qui) => {
+  const camp = p.camps[qui];
+  return p.actif === qui && !p.fini && !camp.meditation && !camp.mediterUtilise
+    && camp.energie >= COUT_MEDITER && camp.deck.length > 0;
+};
+
+export function mediter(p, qui) {
+  if (!peutMediter(p, qui)) return null;
+  const camp = p.camps[qui];
+  camp.energie -= COUT_MEDITER;
+  camp.mediterUtilise = true;
+  camp.meditation = camp.deck.slice(0, 3);
+  return { type: 'mediter', qui, cartes: camp.meditation };
+}
+
+// index : 0, 1 ou 2 (la carte à placer sous le Grimoire), ou null pour ne rien changer
+export function placerSous(p, qui, index = null) {
+  const camp = p.camps[qui];
+  if (!camp.meditation || p.actif !== qui) return null;
+  let carte = null;
+  if (Number.isInteger(index) && index >= 0 && index < camp.meditation.length) {
+    [carte] = camp.deck.splice(index, 1);
+    camp.deck.push(carte);
+  }
+  camp.meditation = null;
+  return { type: 'placer', qui, sous: !!carte };
 }
 
 // Effet d'un sort
@@ -387,7 +525,7 @@ export function attaquer(p, qui, uid, cible) {
   const camp = p.camps[qui];
   const adverse = p.camps[autre(qui)];
   const u = trouver(camp, uid);
-  if (!peutAttaquer(u) || p.actif !== qui || p.fini) return null;
+  if (!peutAttaquer(u) || p.actif !== qui || p.fini || camp.meditation) return null;
   if (!ciblesAttaque(p, qui).some((c) => memeCible(c, cible))) return null;
 
   let de = d20();
@@ -422,7 +560,7 @@ export function attaquer(p, qui, uid, cible) {
 }
 
 // Jet du Destin : 2 énergie, une fois par tour
-export const peutDestin = (p, qui) => p.actif === qui && !p.fini
+export const peutDestin = (p, qui) => p.actif === qui && !p.fini && !p.camps[qui].meditation
   && !p.camps[qui].destinUtilise && p.camps[qui].energie >= COUT_DESTIN;
 
 export function destin(p, qui) {
@@ -484,11 +622,33 @@ export function destin(p, qui) {
 // ---------------------------------------------------------------------
 //  IA : renvoie la prochaine action de l'Ombre, ou null pour finir le tour
 //  { type: 'jouer', index, cible } | { type: 'destin' } | { type: 'attaque', uid, cible }
+//  | { type: 'defausser', index } | { type: 'mediter' } | { type: 'placer', index }
+//  Elle suit les mêmes règles que le joueur.
+//  difficulte : 'facile' (oublie parfois une carte, vise au hasard, Destin rare),
+//               'normal' (le jeu habituel), 'difficile' (Destin plus souvent ; les boss
+//               ont en plus des PV et de l'énergie en bonus, voir creerPartie)
 // ---------------------------------------------------------------------
-export function ai(p, qui = 'adverse') {
+const CHANCE_DESTIN = { facile: 0.15, normal: 0.5, difficile: 0.75 };
+
+// Renvoi de main de l'IA : les cartes trop chères pour les premiers tours (coût 5 ou plus)
+export function choixRenvoiIA(camp) {
+  return camp.main.map((c, i) => (c.c >= 5 ? i : -1)).filter((i) => i >= 0);
+}
+
+export function ai(p, qui = 'adverse', difficulte = 'normal') {
   const camp = p.camps[qui];
   const adv = p.camps[autre(qui)];
   const ennemis = unites(adv);
+  const facile = difficulte === 'facile';
+
+  // 0. Méditation en cours : la carte la plus chère qu'elle ne pourra pas jouer bientôt part dessous
+  if (camp.meditation) {
+    const loin = camp.meditation
+      .map((c, i) => ({ c, i }))
+      .filter(({ c }) => c.c > Math.min(ENERGIE_MAX, camp.energieMax + 2))
+      .sort((x, y) => y.c.c - x.c.c)[0];
+    return { type: 'placer', index: loin ? loin.i : null };
+  }
 
   // 1. Victoire immédiate avec un sort sur le héros
   const fatal = camp.main.findIndex((c, i) => c.fx === 'face' && c.v >= adv.pv && peutJouer(p, qui, i));
@@ -496,7 +656,9 @@ export function ai(p, qui = 'adverse') {
 
   // 2. Cartes, de la plus chère à la moins chère, si elles servent à quelque chose
   const ordre = camp.main.map((c, i) => ({ c, i })).filter(({ i }) => peutJouer(p, qui, i)).sort((x, y) => y.c.c - x.c.c);
-  for (const { c, i } of ordre) {
+  // Facile : une fois sur quatre, l'IA « oublie » ses cartes et passe aux attaques
+  const oublie = facile && Math.random() < 0.25;
+  for (const { c, i } of oublie ? [] : ordre) {
     if (c.t === 'u') return { type: 'jouer', index: i };
     if (c.fx === 'unit') {
       // de préférence une unité qu'il tue, la plus menaçante
@@ -516,13 +678,13 @@ export function ai(p, qui = 'adverse') {
     if (c.fx === 'talisman' && (camp.bonusDe || !unites(camp).some(peutAttaquer))) continue;
     if (c.fx === 'jeton' && (camp.reduction || !camp.main.some((x) => x !== c && x.c > camp.energie && x.c - c.v <= camp.energie))) continue;
     if (c.fx === 'aoe' && ennemis.length < 2) continue;
-    if (c.fx === 'heal' && camp.pv > PV_HEROS - c.v) continue;
+    if (c.fx === 'heal' && camp.pv > camp.pvMax - c.v) continue;
     if (c.fx === 'draw' && camp.main.length > 5) continue;
     return { type: 'jouer', index: i };
   }
 
-  // 3. Le Destin, une fois sur deux s'il reste de l'énergie
-  if (peutDestin(p, qui) && camp.pv > 3 && Math.random() < 0.5) return { type: 'destin' };
+  // 3. Le Destin, plus ou moins souvent selon la difficulté, s'il reste de l'énergie
+  if (peutDestin(p, qui) && camp.pv > 3 && Math.random() < (CHANCE_DESTIN[difficulte] ?? 0.5)) return { type: 'destin' };
 
   // 4. Attaques
   const pretes = unites(camp).filter(peutAttaquer).sort((a, b) => b.a - a.a);
@@ -530,6 +692,8 @@ export function ai(p, qui = 'adverse') {
     const cibles = ciblesAttaque(p, qui);
     const unitesCibles = cibles.filter((c) => !c.heros).map((c) => trouver(adv, c.uid));
     const heros = cibles.find((c) => c.heros);
+    // Facile : une cible au hasard, sans calcul
+    if (facile) return { type: 'attaque', uid: u.uid, cible: cibles[Math.floor(Math.random() * cibles.length)] };
     // Garde : il faut la frapper, la plus fragile d'abord
     if (!heros) {
       const g = unitesCibles.sort((a, b) => a.h - b.h)[0];
@@ -542,5 +706,12 @@ export function ai(p, qui = 'adverse') {
     if (echange && adv.pv > u.a) return { type: 'attaque', uid: u.uid, cible: { camp: autre(qui), uid: echange.uid } };
     return { type: 'attaque', uid: u.uid, cible: heros };
   }
+
+  // 5. Énergie restante : défausser une carte injouable avant longtemps, ou méditer
+  if (!facile && peutDefausser(p, qui) && !camp.main.some((c, i) => peutJouer(p, qui, i))) {
+    const lourde = camp.main.map((c, i) => ({ c, i })).filter(({ c }) => c.c > camp.energieMax + 2).sort((x, y) => y.c.c - x.c.c)[0];
+    if (lourde) return { type: 'defausser', index: lourde.i };
+  }
+  if (!facile && peutMediter(p, qui) && camp.deck.length >= 3) return { type: 'mediter' };
   return null;
 }

@@ -5,7 +5,7 @@
 // =====================================================================
 import { SITE_ROOT } from './supabase.js';
 import { $, esc } from './commun.js';
-import { ENERGIE_MAX, COUT_DESTIN, peutJouer, peutAttaquer, peutDestin, rollInfo, coutDe } from './jeu-cartes-moteur.js';
+import { ENERGIE_MAX, COUT_DESTIN, COUT_DEFAUSSE, COUT_MEDITER, peutJouer, peutAttaquer, peutDestin, peutDefausser, peutMediter, rollInfo, coutDe } from './jeu-cartes-moteur.js';
 import { jouerSon, SM } from './jeu-cartes-son.js';
 import { particules, onde, flash, voile, secousseEcran, eclair, briser } from './jeu-cartes-effets.js';
 
@@ -155,9 +155,18 @@ function htmlHeros(camp, qui, avatar, sel) {
 function pileDeck(n) {
   const epaisseur = n > 12 ? 3 : n > 4 ? 2 : n > 0 ? 1 : 0;
   return `
-    <span class="pile-deck" title="${n} carte${n > 1 ? 's' : ''} dans le deck">
+    <span class="pile-deck" title="Grimoire : ${n} carte${n > 1 ? 's' : ''} restante${n > 1 ? 's' : ''}">
       ${'<i></i>'.repeat(epaisseur)}<b>${n}</b>
     </span>`;
+}
+
+// Le Tombeau : une pierre tombale, le nombre de cartes et le nom de la dernière arrivée
+function htmlTombeau(camp) {
+  const n = camp.tombeau?.length ?? 0;
+  const dessus = n ? camp.tombeau[n - 1] : null;
+  return `
+    <span class="tombeau__pierre" aria-hidden="true"><svg viewBox="0 0 24 28"><path d="M4 27V10a8 8 0 0 1 16 0v17z"/><path d="M12 8v8M8.5 11h7"/></svg></span>
+    <span class="tombeau__texte"><b>${n}</b><small>${dessus ? esc(dessus.n) : 'Tombeau'}</small></span>`;
 }
 
 function htmlEnergie(camp) {
@@ -185,6 +194,11 @@ export function rendre(p, sel, avatars = {}) {
   $('orbe-valeur').textContent = j.energie;
   $('orbe-max').textContent = `/ ${j.energieMax}`;
   $('pioche-joueur').innerHTML = pileDeck(j.deck.length);
+  for (const [qui, camp] of [['joueur', j], ['adverse', a]]) {
+    const el = $(`tombeau-${qui}`);
+    el.innerHTML = htmlTombeau(camp);
+    el.title = `Tombeau : ${camp.tombeau?.length ?? 0} carte${(camp.tombeau?.length ?? 0) > 1 ? 's' : ''} (toucher pour voir)`;
+  }
 
   for (const [qui, camp] of [['adverse', a], ['joueur', j]]) {
     $(`terrain-${qui}`).innerHTML = camp.terrain.map((u) => (u
@@ -194,8 +208,11 @@ export function rendre(p, sel, avatars = {}) {
 
   $('main-joueur').innerHTML = j.main.map((c, i) => htmlCarte(c, {
     cout: coutDe(j, c),
-    index: i, jouable: sel.monTour && peutJouer(p, 'joueur', i), choisie: sel.sortIndex === i,
+    index: i, jouable: sel.monTour && !sel.defausse && peutJouer(p, 'joueur', i), choisie: sel.sortIndex === i,
   })).join('');
+  const glissable = sel.monTour && peutDefausser(p, 'joueur');
+  for (const c of $('main-joueur').children) c.draggable = glissable;
+  $('main-joueur').classList.toggle('en-defausse', !!sel.defausse);
   $('main-adverse').innerHTML = a.main.map(() => '<i class="dos"></i>').join('');
   // Les deux mains s'ouvrent en éventail : --k = place de la carte par rapport au centre
   for (const id of ['main-joueur', 'main-adverse']) {
@@ -206,6 +223,13 @@ export function rendre(p, sel, avatars = {}) {
   $('btn-fin').disabled = !sel.monTour;
   $('btn-destin').disabled = !sel.monTour || !peutDestin(p, 'joueur');
   $('btn-destin').title = j.destinUtilise ? 'Déjà lancé ce tour-ci' : `Coûte ${COUT_DESTIN} énergie, une fois par tour`;
+  $('btn-defausser').disabled = !sel.monTour || !peutDefausser(p, 'joueur');
+  $('btn-defausser').classList.toggle('est-actif', !!sel.defausse);
+  $('btn-defausser').title = j.defausseUtilisee ? 'Déjà défaussé ce tour-ci'
+    : `Défausser une carte de ta main et en piocher une (${COUT_DEFAUSSE} énergie, une fois par tour). Tu peux aussi la glisser sur ton Tombeau.`;
+  $('btn-mediter').disabled = !sel.monTour || !peutMediter(p, 'joueur');
+  $('btn-mediter').title = j.mediterUtilise ? 'Déjà médité ce tour-ci'
+    : `Regarder les 3 premières cartes de ton Grimoire (${COUT_MEDITER} énergie, une fois par tour)`;
 
   $('historique').innerHTML = p.jets.map((x) => `
     <li class="jet jet--${x.q}${x.qui === 'joueur' ? ' jet--moi' : ''}">
@@ -225,6 +249,33 @@ const elHeros = (qui) => document.querySelector(`.dc-heros[data-heros="${qui}"]`
 export const elCible = (c) => (c.heros ? elHeros(c.camp) : elUnite(c.uid));
 
 // Chiffre flottant (dégâts en rouge, soin en vert, bonus en ambre)
+// Effets de pioche d'un événement (sorts, Destin, défausse) : cartes piochées, brûlées, épuisement.
+// Le début de tour a ses propres bannières (JS/jeu-cartes.js, afficherTour).
+async function effetsPioche(ev) {
+  const r = ev.pioche;
+  if (!r) return;
+  const pile = ev.qui === 'joueur' ? $('pioche-joueur') : $('main-adverse');
+  const tombe = $(`tombeau-${ev.qui}`);
+  if (r.piochees?.length) {
+    flotter(pile, `+${r.piochees.length} carte${r.piochees.length > 1 ? 's' : ''}`, 'buff');
+    jouerSon('pioche');
+  }
+  if (r.brulees?.length) {
+    await pause(250);
+    flotter(tombe, `Brûlée : ${r.brulees[0].n ?? 'une carte'}`, 'rate');
+    particules(tombe, { n: 22, couleurs: BRAISES, vitesse: 90, monte: 70, gravite: -40, depuis: 'surface' });
+    jouerSon('feu');
+  }
+  if (r.epuisement) {
+    await pause(250);
+    const heros = elHeros(ev.qui);
+    secouer(heros);
+    flotter(heros, `Épuisement -${r.epuisement}`);
+    particules(heros, { n: 16, couleurs: ['#a66cd9', '#6e3a9a', '#d2b4f0'], vitesse: 70, monte: 30, rond: true, depuis: 'surface' });
+  }
+  await pause(300);
+}
+
 export function flotter(el, texte, type = 'degats') {
   if (!el) return;
   const r = el.getBoundingClientRect();
@@ -256,11 +307,14 @@ export async function banniere(texte, sous = '', type = '') {
 }
 
 // d20 : il roule, puis s'arrête sur le résultat
+// Le dé n'apparaît que pendant un lancer (attaque ou Jet du Destin), puis s'efface
+let minuteurDe = null;
 export async function lancerDe(de, label, q, destin = false) {
   const zone = $('d20');
   const face = $('d20-face');
   const res = $('d20-resultat');
-  zone.className = `d20 roule${destin ? ' d20--destin' : ''}`;
+  clearTimeout(minuteurDe);
+  zone.className = `d20 roule est-visible${destin ? ' d20--destin' : ''}`;
   res.textContent = '';
   res.className = 'centre__resultat';
   jouerSon('de');
@@ -271,12 +325,17 @@ export async function lancerDe(de, label, q, destin = false) {
     }
   }
   face.textContent = de;
-  zone.className = `d20 d20--${q}${destin ? ' d20--destin' : ''}`;
+  zone.className = `d20 est-visible d20--${q}${destin ? ' d20--destin' : ''}`;
   res.textContent = label;
-  res.className = `centre__resultat centre__resultat--${q}`;
+  res.className = `centre__resultat est-visible centre__resultat--${q}`;
   if (de === 20) jouerSon('fanfare');
   if (de === 1) jouerSon('echec');
   await pause(500);
+  // Le résultat reste lisible un moment, puis le dé et son étiquette s'effacent
+  minuteurDe = setTimeout(() => {
+    zone.classList.remove('est-visible');
+    res.classList.remove('est-visible');
+  }, reduit ? 2500 : 2200);
 }
 
 // Effets visuels à l'arrivée d'une unité (UFX) et des sorts (SFX), indexés par nom de carte.
@@ -362,9 +421,9 @@ export async function animer(ev) {
         else { secouer(el); flotter(el, `-${t.valeur}`); }
       }
       if (ev.carte.fx === 'draw') particules($('main-joueur'), { n: 12, couleurs: ['#c5d2ef', '#ffffff'], vitesse: 60, monte: 50, gravite: -20, depuis: 'surface' });
-      if (ev.qui === 'joueur' && ev.pioche?.piochees.length) flotter($('pioche-joueur'), `+${ev.pioche.piochees.length} cartes`, 'buff');
       await pause(250);
       await mourir(ev.morts);
+      await effetsPioche(ev);
       await pause(350);
       return;
     }
@@ -403,6 +462,7 @@ export async function animer(ev) {
       await pause(350);
       att?.classList.remove('fx-elan');
       await mourir(ev.morts);
+      await effetsPioche(ev);
       await pause(250);
       return;
     }
@@ -424,7 +484,31 @@ export async function animer(ev) {
         }
       }
       await mourir(ev.morts);
+      await effetsPioche(ev);
       await pause(300);
+      return;
+    }
+    case 'defausse': {
+      // La carte glisse vers le Tombeau puis s'y efface
+      const tombe = $(`tombeau-${ev.qui}`);
+      flotter(tombe, `Défaussée : ${ev.carte.n}`, 'rate');
+      particules(tombe, { n: 16, couleurs: ['#9aa1ad', '#c5cad3', '#5d6574'], vitesse: 70, monte: 40, gravite: 30, depuis: 'surface' });
+      jouerSon('pioche');
+      await pause(350);
+      await effetsPioche(ev);
+      return;
+    }
+    case 'mediter': {
+      const pile = ev.qui === 'joueur' ? $('pioche-joueur') : $('infos-adverse');
+      flotter(pile, 'Méditation…', 'buff');
+      onde(pile, '#c9b2fb', 1.8, 700);
+      jouerSon('cloche');
+      await pause(400);
+      return;
+    }
+    case 'placer': {
+      if (ev.sous) flotter(ev.qui === 'joueur' ? $('pioche-joueur') : $('infos-adverse'), 'Une carte sous le Grimoire', 'buff');
+      await pause(250);
       return;
     }
     default: return;

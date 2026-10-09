@@ -13,6 +13,9 @@
 <link rel="stylesheet" href="../CSS/search.css">
 <link rel="stylesheet" href="../CSS/compte.css">
 <link rel="stylesheet" href="../CSS/carte-infos.css">
+<!-- Thème clair / sombre (bouton dans la barre latérale) : appliqué avant l'affichage -->
+<script>try{if(localStorage.getItem('nocthemar-theme')==='jour')document.documentElement.dataset.theme='jour'}catch(e){}</script>
+<link rel="stylesheet" href="../CSS/theme-jour.css">
 </head>
 <body>
 <canvas id="embers"></canvas>
@@ -63,7 +66,7 @@
 
         <div class="profile-badges">
           <a class="pbadge veine" href="../Rang%20des%20Pouvoirs/Sang.html">🩸 Veine du Sang — Rang I, Cœur Immuable</a>
-          <a class="pbadge divinite" href="../categories/Religion.html">🕯️ Divinité — catégorie Religion</a>
+          <span class="pbadge divinite">🕯️ Divinité</span>
         </div>
 
         <p style="margin-top:1.8em;">Il y a plusieurs siècles, des milliers d'enfants furent enlevés et enfermés dans les profondeurs d'une immense forteresse. Dans des cryptes dédiées aux anciens rites, ils servaient d'offrandes à des expériences mêlant Rituels et Pactes, dans l'espoir de reproduire le pouvoir des Veines.</p>

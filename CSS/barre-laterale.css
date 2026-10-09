@@ -112,7 +112,17 @@
 .rail .auth-user__avatar{ flex:0 0 32px; width:32px; height:32px; }
 .rail .auth-user__nom{ display:inline; opacity:0; transition:opacity .2s ease; }
 .rail:hover .auth-user__nom, .rail:focus-within .auth-user__nom{ opacity:1; transition-delay:.08s; }
-.rail .btn-deco, .rail .lien-mj{ width:30px; height:30px; margin-left:5px; flex-shrink:0; }
+/* Déconnexion et panneau MJ : l'un sous l'autre quand la barre est fermée,
+   côte à côte quand elle s'ouvre (survol, clavier) */
+.auth-actions{ display:flex; align-items:center; gap:6px; }
+.rail .auth-actions{ flex-direction:column; justify-content:center; gap:8px; padding-left:0; }
+@media (hover:hover) and (min-width:701px){
+  .rail:hover:not(:has(.search-panel.open)) .auth-actions{ flex-direction:row; justify-content:flex-start; padding-left:5px; }
+}
+@media (min-width:701px){
+  .rail:focus-within:not(:has(.search-panel.open)) .auth-actions{ flex-direction:row; justify-content:flex-start; padding-left:5px; }
+}
+.rail .btn-deco, .rail .lien-mj{ display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; padding:0; margin-left:0; flex-shrink:0; }
 
 /* Place réservée à gauche pour que la barre ne couvre pas le contenu */
 @media (min-width:701px){
@@ -137,6 +147,7 @@
   .rail .btn-discord{ width:40px; padding:0; justify-content:center; }
   .rail .auth-user{ width:auto; height:40px; padding:0; }
   .rail .btn-deco, .rail .lien-mj{ margin-left:0; }
+  .rail .auth-actions{ flex-direction:row; margin:0; gap:10px; padding-left:0; }
   /* le panneau de recherche s'ouvre au-dessus de la barre, sur toute sa largeur */
   .rail .search-wrap{ position:static; }
   .rail .search-panel,

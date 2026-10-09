@@ -7,7 +7,7 @@
 import { supabase, connexionDiscord, getMonJoueur, SITE_ROOT } from './supabase.js';
 import { $, esc, couleur, LIBELLES, SOURCES } from './commun.js';
 import { chargerDeck, Deck, activerGlisser, htmlCarte } from './cartes.js';
-import { OBJETS, objetDepuisNom } from './jeu-cartes-moteur.js';
+import { OBJETS, TAILLE_DECK, objetDepuisNom } from './jeu-cartes-moteur.js';
 
 // Le joueur + ses cosmétiques équipés, en une seule requête
 const SELECT_JOUEUR = `
@@ -47,15 +47,17 @@ async function init() {
   const estMoi = moi?.discord_id === discordId;
 
   afficherEntete(joueur);
-  await afficherDeck(discordId, estMoi);
+  const deckProfil = await afficherDeck(discordId, estMoi);
 
   // Partie privée : seulement sur mon propre profil
   if (estMoi) {
     $('prive').hidden = false;
     $('duelliste').hidden = false;
     $('bourse').hidden = false;
+    const objets = await chargerObjetsPossedes(discordId);
     await Promise.all([
-      afficherDuelliste(discordId),
+      afficherDuel(deckProfil, objets, discordId),
+      afficherDuelliste(objets),
       afficherSolde(discordId),
       afficherInventaire(discordId, joueur),
       afficherHistorique(discordId),
@@ -98,17 +100,8 @@ function afficherEntete(j) {
 
 // Le duelliste : cartes possédées et objets de pouvoir du Duel des Couronnes.
 // Les 7 objets sont toujours affichés : ceux qu'on possède en couleur, les autres grisés.
-async function afficherDuelliste(discordId) {
-  const [{ count: nbCartes }, { count: nbCatalogue }, { data: inventaire }] = await Promise.all([
-    supabase.from('player_cards').select('card_id', { count: 'exact', head: true }).eq('discord_id', discordId),
-    supabase.from('cards').select('id', { count: 'exact', head: true }).eq('is_available', true),
-    supabase.from('inventory').select('item:items(name)').eq('discord_id', discordId),
-  ]);
-  const possedes = new Set((inventaire ?? []).map(({ item }) => item && objetDepuisNom(item.name)?.id).filter(Boolean));
-
-  $('duelliste-stats').innerHTML = [
-    ['Cartes', `${nbCartes ?? 0}${nbCatalogue ? ` / ${nbCatalogue}` : ''}`],
-  ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+function afficherDuelliste(objets) {
+  const possedes = new Set(objets.map((o) => o.id));
 
   const zone = $('objets-pouvoir');
   let choisi = null;   // objet dont l'effet est affiché (un clic l'ouvre, un 2e le ferme)
@@ -146,26 +139,66 @@ async function afficherDeck(discordId, estMoi) {
   const { nom, ids, cartes } = await chargerDeck(discordId);
   const deck = new Deck($('deck'), { nom, ids, cartes, editable: estMoi, lienAjout: 'collection.html' });
 
-  if (!estMoi) return;
+  if (!estMoi) return { nom, ids, cartes };
   $('lien-collection').hidden = false;
-  afficherDuel(nom, ids.filter((id) => id != null).map((id) => cartes.get(id)));
   activerGlisser($('deck'), {
     poignee: '.deck-emplacement .carte-jeu',
     cible: '.deck-emplacement',
     deposer: (carte, cible) => deck.placer(Number(carte.dataset.carte), Number(cible.dataset.position)),
   });
+  return { nom, ids, cartes };
 }
 
 
-// Encart du Duel des Couronnes : les 3 premières cartes du deck en éventail
-// (dos de carte pour les places vides)
-function afficherDuel(nomDeck, cartesDeck) {
-  $('duel-deck').textContent = nomDeck;
-  const main = cartesDeck.slice(0, 3);
+// Encart du Duel des Couronnes : le Grimoire (20 cartes) choisi dans le jeu
+// (« Choisir mes cartes », retenu dans ce navigateur par JS/jeu-cartes.js), et le nombre
+// de cartes et d'objets de pouvoir possédés. Ce qui manque au Grimoire est complété par
+// des cartes de base au début de chaque partie.
+const CLE_GRIMOIRE = 'duel-couronnes-grimoire';
+
+function grimoireChoisi() {
+  try {
+    const cles = JSON.parse(localStorage.getItem(CLE_GRIMOIRE) ?? 'null');
+    return Array.isArray(cles) ? cles.slice(0, TAILLE_DECK) : null;
+  } catch {
+    return null;   // stockage indisponible
+  }
+}
+
+async function afficherDuel(deckProfil, objets, discordId) {
+  const [{ count: nbCartes }, { count: nbCatalogue }] = await Promise.all([
+    supabase.from('player_cards').select('card_id', { count: 'exact', head: true }).eq('discord_id', discordId),
+    supabase.from('cards').select('id', { count: 'exact', head: true }).eq('is_available', true),
+  ]);
+
+  // Accroche : de quoi est fait le Grimoire
+  const cles = grimoireChoisi();
+  const choisies = cles ? cles.length : null;
+  const nbObjets = cles ? cles.filter((k) => k.startsWith('o-')).length : 0;
+  $('duel-accroche').innerHTML = choisies == null
+    ? `Ton Grimoire de ${TAILLE_DECK} cartes se construit avec ta collection. Choisis tes cartes dans le jeu et affronte l'Ombre du Codex : chaque coup se joue au d20.`
+    : `Ton Grimoire est prêt : ${choisies} carte${choisies > 1 ? 's' : ''} choisie${choisies > 1 ? 's' : ''}${nbObjets ? `, dont ${nbObjets} objet${nbObjets > 1 ? 's' : ''} de pouvoir` : ''}${choisies < TAILLE_DECK ? `, complété par ${TAILLE_DECK - choisies} cartes de base` : ''}. Pose tes unités, sers-toi de tes objets, et que chaque coup se joue au d20.`;
+
+  $('duel-stats').innerHTML = [
+    ['Grimoire', `${TAILLE_DECK} cartes`],
+    ['Cartes', `${nbCartes ?? 0}${nbCatalogue ? ` / ${nbCatalogue}` : ''}`],
+    ['Objets', `${objets.length} / ${OBJETS.length}`],
+  ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+
+  // Éventail : les 3 premières cartes du deck du profil (dos de carte pour les places vides)
+  const main = deckProfil.ids.filter((id) => id != null).map((id) => deckProfil.cartes.get(id)).filter(Boolean).slice(0, 3);
   $('duel-eventail').innerHTML = [0, 1, 2]
     .map((i) => main[i] ? htmlCarte(main[i]) : '<div class="carte-jeu carte-jeu--sans-image"></div>')
     .join('');
   $('duel').hidden = false;
+}
+
+
+// Objets de pouvoir possédés (table inventory), un exemplaire de chacun
+async function chargerObjetsPossedes(discordId) {
+  const { data } = await supabase.from('inventory').select('item:items(name)').eq('discord_id', discordId);
+  const objets = (data ?? []).map(({ item }) => item && objetDepuisNom(item.name)).filter(Boolean);
+  return [...new Map(objets.map((o) => [o.id, o])).values()];
 }
 
 

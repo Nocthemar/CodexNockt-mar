@@ -173,7 +173,8 @@ export class Deck {
       const carte = id != null ? this.cartes.get(id) : null;
       if (carte) {
         return `
-          <div class="deck-emplacement deck-emplacement--plein" data-position="${i}">
+          <div class="deck-emplacement deck-emplacement--plein" data-position="${i}"
+            data-nom="${esc(carte.name)}" data-rarete="${RARETES[carte.rarity] ? carte.rarity : 'commune'}">
             <div class="deck-flip" role="button" tabindex="0" aria-pressed="false"
               title="Cliquer pour retourner la carte" aria-label="Retourner ${esc(carte.name)}">
               ${htmlCarte(carte)}

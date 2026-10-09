@@ -13,6 +13,9 @@
 <link rel="stylesheet" href="../CSS/search.css">
 <link rel="stylesheet" href="../CSS/compte.css">
 <link rel="stylesheet" href="../CSS/carte-infos.css">
+<!-- Thème clair / sombre (bouton dans la barre latérale) : appliqué avant l'affichage -->
+<script>try{if(localStorage.getItem('nocthemar-theme')==='jour')document.documentElement.dataset.theme='jour'}catch(e){}</script>
+<link rel="stylesheet" href="../CSS/theme-jour.css">
 </head>
 <body>
 <canvas id="embers"></canvas>
@@ -63,7 +66,7 @@
 
         <div class="profile-badges">
           <a class="pbadge veine" href="../Rang%20des%20Pouvoirs/Reve.html">🌙 Veine du Rêve — Rang I, Seigneurs des Rêves</a>
-          <a class="pbadge divinite" href="../categories/Religion.html">🕯️ Divinité — catégorie Religion</a>
+          <span class="pbadge divinite">🕯️ Divinité</span>
         </div>
 
         <p style="margin-top:1.8em;">Dalek est détenteur de la Veine du Rêve — Rang I, Seigneurs des Rêves, le plus haut degré de maîtrise connu. À ce niveau, le monde onirique lui appartient : il façonne des rêves entiers, plonge plusieurs esprits dans une même vision partagée, et laisse parfois les blessures du songe suivre le dormeur jusqu'à son réveil.</p>
