@@ -36,8 +36,8 @@
   const icone = (nom) => `<span class="rail-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[nom]}</svg></span>`;
 
   // Le jeu de cartes (Duel des Couronnes) vit à part, sur sa propre adresse :
-  // ⚠️ à remplir avec l'adresse du jeu une fois en ligne (avec le « / » final)
-  const URL_JEU = 'https://julesfall-33.github.io/Duel-des-Couronnes/';
+  // (dépôt GitHub CarteJeuxNocthemar)
+  const URL_JEU = 'https://nocthemar.github.io/CarteJeuxNocthemar/jeu-cartes.html';
 
   const page = location.pathname.replace(/\/$/, '/index.html');
   const surAccueil = new URL('index.html', racine).pathname === page;
