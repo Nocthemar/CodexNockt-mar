@@ -5,7 +5,7 @@
    de la barre latérale (JS/barre-laterale.js).
    Les pages gardent leurs propres couleurs : ici on ne fait qu'inverser la
    palette commune (--ink, --parchment…) et corriger ce qui est écrit en dur.
-   Le jeu de cartes et la fiche du profil ont leur propre décor : non concernés.
+   La fiche du profil a son propre décor : non concernée.
    ===================================================================== */
 
 :root[data-theme="jour"] {
@@ -74,9 +74,8 @@
 }
 :root[data-theme="jour"] .home #embers { opacity: .18; }
 
-/* ---------- Jeu de cartes et fiche de profil : décors à part, restent tels quels ---------- */
+/* ---------- Fiche de profil : décor à part, reste tel quel ---------- */
 /* (et les îlots sombres : panneaux de la boutique, dont le bois et les enseignes restent nocturnes) */
-:root[data-theme="jour"] body.page-jeu,
 :root[data-theme="jour"] body.page-fiche,
 :root[data-theme="jour"] .echoppe {
   --ink: #131010; --ink-2: #1a1616; --ink-3: #221d1c;
@@ -90,22 +89,22 @@
 }
 
 /* ---------- Barre latérale ---------- */
-:root[data-theme="jour"] body:not(.page-jeu):not(.page-fiche) .rail {
+:root[data-theme="jour"] body:not(.page-fiche) .rail {
   background: rgba(232,225,213,.9);
   border-color: rgba(60,40,20,.18);
   box-shadow: 0 14px 40px rgba(60,40,20,.22), inset 0 1px 0 rgba(255,255,255,.7);
 }
 @media (hover:hover) and (min-width:701px){
-  :root[data-theme="jour"] body:not(.page-jeu):not(.page-fiche) .rail:hover:not(:has(.search-panel.open)) { background: rgba(232,225,213,.97); }
+  :root[data-theme="jour"] body:not(.page-fiche) .rail:hover:not(:has(.search-panel.open)) { background: rgba(232,225,213,.97); }
 }
 @media (min-width:701px){
-  :root[data-theme="jour"] body:not(.page-jeu):not(.page-fiche) .rail:focus-within:not(:has(.search-panel.open)) { background: rgba(232,225,213,.97); }
+  :root[data-theme="jour"] body:not(.page-fiche) .rail:focus-within:not(:has(.search-panel.open)) { background: rgba(232,225,213,.97); }
 }
-:root[data-theme="jour"] body:not(.page-jeu):not(.page-fiche) .rail-item:hover,
-:root[data-theme="jour"] body:not(.page-jeu):not(.page-fiche) .rail-item:focus-visible { background: rgba(60,40,20,.07); }
-:root[data-theme="jour"] body:not(.page-jeu):not(.page-fiche) .rail-item.is-active { background: rgba(60,40,20,.08); color: #8a6a2c; }
-:root[data-theme="jour"] body:not(.page-jeu):not(.page-fiche) .rail-item.is-active::before { background: #8a6a2c; }
-:root[data-theme="jour"] body:not(.page-jeu):not(.page-fiche) .rail-sep { background: rgba(60,40,20,.16); }
+:root[data-theme="jour"] body:not(.page-fiche) .rail-item:hover,
+:root[data-theme="jour"] body:not(.page-fiche) .rail-item:focus-visible { background: rgba(60,40,20,.07); }
+:root[data-theme="jour"] body:not(.page-fiche) .rail-item.is-active { background: rgba(60,40,20,.08); color: #8a6a2c; }
+:root[data-theme="jour"] body:not(.page-fiche) .rail-item.is-active::before { background: #8a6a2c; }
+:root[data-theme="jour"] body:not(.page-fiche) .rail-sep { background: rgba(60,40,20,.16); }
 
 /* ---------- Accueil : héros, carrousel, dock, pied de page ---------- */
 /* Le voile sombre sur l'image devient un voile de lumière, plus dense en bas */
@@ -149,7 +148,6 @@
 :root[data-theme="jour"] .hero-cta:hover { background: rgba(168,35,44,.08); }
 
 /* Barre latérale du jeu et du profil : elle reste sombre, ses boutons de compte (déconnexion, MJ) gardent donc leurs couleurs claires */
-:root[data-theme="jour"] body.page-jeu .rail,
 :root[data-theme="jour"] body.page-fiche .rail {
   --texte: #f2eee6; --texte-doux: #bcb2a4; --bord: rgba(240,236,227,.27); --fond: #131010;
 }

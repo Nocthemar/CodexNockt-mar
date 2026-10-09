@@ -28,8 +28,6 @@
     {name:"Commerce", path:"categories/Commerce.html", tag:"Catégorie"},
     {name:"Politique", path:"categories/Politique.html", tag:"Catégorie"},
     {name:"Règles du JDR", path:"categories/Regles.html", tag:"Catégorie"},
-    {name:"Duel des Couronnes", path:"jeu-cartes.html", tag:"Jeu de cartes", keywords:["Jeu de cartes","Duel"]},
-    {name:"Mode Histoire", path:"histoire.html", tag:"Jeu de cartes", keywords:["Campagne","Pravorn","Boss"]},
     {name:"Sang", path:"Rang%20des%20Pouvoirs/Sang.html", tag:"Rang de Veine"},
     {name:"Trône", path:"Rang%20des%20Pouvoirs/Trone.html", tag:"Rang de Veine"},
     {name:"Regard", path:"Rang%20des%20Pouvoirs/Regard.html", tag:"Rang de Veine"},

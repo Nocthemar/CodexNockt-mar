@@ -35,10 +35,13 @@
   };
   const icone = (nom) => `<span class="rail-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[nom]}</svg></span>`;
 
+  // Le jeu de cartes (Duel des Couronnes) vit à part, sur sa propre adresse :
+  // ⚠️ à remplir avec l'adresse du jeu une fois en ligne (avec le « / » final)
+  const URL_JEU = 'https://julesfall-33.github.io/Duel-des-Couronnes/';
+
   const page = location.pathname.replace(/\/$/, '/index.html');
   const surAccueil = new URL('index.html', racine).pathname === page;
   const surBoutique = new URL('boutique.html', racine).pathname === page;
-  const surJeu = ['jeu-cartes.html', 'histoire.html'].some((p) => new URL(p, racine).pathname === page);
 
   function item(nom, libelle, href, actif){
     const a = document.createElement('a');
@@ -120,7 +123,7 @@
   const liens = document.createElement('div');
   liens.className = 'rail-compte-liens';
   liens.append(
-    item('cartes', 'Jeu de cartes', lien('jeu-cartes.html'), surJeu),
+    item('cartes', 'Jeu de cartes', URL_JEU, false),
     item('boutique', 'Boutique', lien('boutique.html'), surBoutique),
   );
   if(compte){
