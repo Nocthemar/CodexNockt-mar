@@ -161,3 +161,9 @@
 
 /* Boutique, placée sous la photo du compte (JS/barre-laterale.js) */
 .rail-compte-liens{ display:contents; }
+
+/* ESSAI — barre allégée : profil, Boutique, déconnexion et MJ masqués (pas supprimés).
+   Pour annuler : supprimer ce bloc. */
+.rail .auth-user,
+.rail .auth-actions,
+.rail a.rail-item[href$="boutique.html"]{ display:none; }
