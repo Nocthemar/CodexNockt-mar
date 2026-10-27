@@ -35,7 +35,7 @@ async function afficher() {
     </a>
     <div class="auth-actions">
       <button type="button" class="btn-deco" title="Se déconnecter" aria-label="Se déconnecter">⏻</button>
-      ${joueur.is_mj ? `<a class="lien-mj" href="${new URL('mj.html', SITE_ROOT)}" title="Panneau MJ" aria-label="Panneau MJ">MJ</a>` : ''}
+      ${joueur.is_mj ? `<a class="lien-mj" href="https://nocthemar.github.io/JeuxCarte-React/#/mj" title="Panneau MJ" aria-label="Panneau MJ">MJ</a>` : ''}
     </div>`;
 
   // textContent plutôt que innerHTML : un pseudo ne peut pas injecter de code

@@ -5,123 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <title>Panneau MJ — Nocthémar</title>
-  <link rel="icon" type="image/png" href="img/Logo/Nocthemar_logo.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="CSS/polices.css">
-  <link rel="stylesheet" href="CSS/index.css">
-  <link rel="stylesheet" href="CSS/search.css">
-  <link rel="stylesheet" href="CSS/compte.css">
-  <link rel="stylesheet" href="CSS/mj.css">
-<!-- Thème clair / sombre (bouton dans la barre latérale) : appliqué avant l'affichage -->
-<script>try{if(localStorage.getItem('nocthemar-theme')==='jour')document.documentElement.dataset.theme='jour'}catch(e){}</script>
-<link rel="stylesheet" href="CSS/theme-jour.css">
+  <!-- Le panneau MJ a déménagé dans le jeu de cartes (dépôt JeuxCarte-React, écran #/mj) :
+       cette page ne sert plus qu'à rediriger les anciens liens. -->
+  <meta http-equiv="refresh" content="0; url=https://nocthemar.github.io/JeuxCarte-React/#/mj">
+  <link rel="canonical" href="https://nocthemar.github.io/JeuxCarte-React/#/mj">
+  <script>location.replace('https://nocthemar.github.io/JeuxCarte-React/#/mj');</script>
 </head>
-<body class="page-profil page-mj">
-
-  <header class="topbar">
-    <a class="brand" href="index.html">Nocthémar</a>
-    <span class="brand-sub">Codex de l'univers JDR</span>
-    <nav class="nav-links">
-      <a href="index.html">Accueil</a>
-      <a href="index.html#categories">Le Codex</a>
-    </nav>
-    <div class="search-wrap">
-      <button class="nav-search" id="searchToggle" aria-label="Rechercher">
-        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </button>
-      <div class="search-panel" id="searchPanel">
-        <input type="text" id="searchInput" placeholder="Rechercher dans le Codex…" autocomplete="off">
-        <div class="search-results" id="searchResults"></div>
-      </div>
-    </div>
-    <a href="boutique.html" class="nav-boutique">Boutique</a>
-    <div id="discord-auth"></div>
-  </header>
-
-  <main class="profil-wrap mj-wrap">
-
-    <p id="chargement" class="vide">Chargement…</p>
-
-    <section id="refus" class="carte centre" hidden>
-      <h2>Panneau MJ</h2>
-      <p id="refus-texte"></p>
-    </section>
-
-    <div id="panneau" hidden>
-      <header class="mj-entete">
-        <h1>Panneau du Maître du Jeu</h1>
-        <nav class="onglets" role="tablist">
-          <button type="button" class="onglet actif" data-onglet="joueurs">Joueurs</button>
-          <button type="button" class="onglet" data-onglet="journal">Journal</button>
-          <button type="button" class="onglet" data-onglet="objets">Objets &amp; boutique</button>
-        </nav>
-      </header>
-
-      <!-- ============ JOUEURS ============ -->
-      <section id="onglet-joueurs" class="onglet-contenu">
-        <div class="mj-colonnes">
-          <div class="carte">
-            <h2>Joueurs</h2>
-            <input id="recherche" class="champ" type="search" placeholder="Rechercher un joueur…">
-            <ul id="liste-joueurs" class="liste liste-joueurs"></ul>
-          </div>
-
-          <div id="fiche-joueur" class="carte">
-            <p class="vide">Choisis un joueur dans la liste.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ JOURNAL ============ -->
-      <section id="onglet-journal" class="onglet-contenu" hidden>
-        <div class="carte">
-          <div class="mj-titre">
-            <h2>Journal des pièces</h2>
-            <select id="filtre-journal" class="champ champ--auto">
-              <option value="">Tous les joueurs</option>
-            </select>
-          </div>
-          <p class="aide">« Annuler » applique le montant inverse et garde une trace. Pour un achat, ça rembourse les pièces : retire aussi l'objet de l'inventaire si besoin.</p>
-          <ul id="journal" class="liste"></ul>
-        </div>
-      </section>
-
-      <!-- ============ OBJETS ============ -->
-      <section id="onglet-objets" class="onglet-contenu" hidden>
-
-        <div class="carte">
-          <div class="mj-titre">
-            <h2>Boutique du marchand</h2>
-            <button type="button" class="btn-petit" data-action="regenerer">Nouvelle sélection</button>
-          </div>
-          <ul id="jour" class="liste"></ul>
-          <form id="form-ajout-jour" class="ligne-form">
-            <select name="objet" class="champ" required></select>
-            <input name="stock" class="champ champ--court" type="number" min="0" value="3" required>
-            <button type="submit" class="btn-petit">Ajouter à la boutique</button>
-          </form>
-        </div>
-
-        <div class="carte">
-          <div class="mj-titre">
-            <h2>Catalogue</h2>
-            <button type="button" class="btn-petit" data-action="nouvel-objet">+ Nouvel objet</button>
-          </div>
-          <form id="form-objet" class="form-objet" hidden></form>
-          <ul id="catalogue" class="liste"></ul>
-        </div>
-
-      </section>
-    </div>
-  </main>
-
-  <div id="notif" class="notif" role="status" aria-live="polite"></div>
-
-  <script src="JS/search.js"></script>
-  <script src="JS/barre-laterale.js"></script>
-  <script type="module" src="JS/auth.js"></script>
-  <script type="module" src="JS/mj.js"></script>
+<body style="background:#151111;color:#e8dcc4;font-family:Georgia,serif;text-align:center;padding:40px 16px;">
+  <p>Le panneau MJ a déménagé : <a href="https://nocthemar.github.io/JeuxCarte-React/#/mj" style="color:#c9a66b;">aller au panneau MJ</a>.</p>
 </body>
 </html>
